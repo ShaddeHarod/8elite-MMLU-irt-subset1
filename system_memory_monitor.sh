@@ -1,6 +1,17 @@
 #!/system/bin/sh
 # system_memory_monitor.sh
 # 系统级内存监控，监控所有genie相关进程
+#
+# 功能说明：
+# - 检测genie-t2t-run进程的PSS（Proportional Set Size）内存使用情况
+# - 监控系统总体内存使用情况
+# - 注意：PSS无法读取NPU专用内存占用，对于大模型推理会有较大偏差
+#
+# 使用限制：
+# - PSS统计只包含用户空间内存，不包含NPU/GPU专用内存
+# - 对于加载GB级模型权重的情况，PSS可能只显示几十MB
+# - 实际内存消耗需要通过系统总内存变化来估算
+#
 # 对所有sh脚本别忘了做dos2unix指令
 if [ $# -ne 1 ]; then
     echo "用法: $0 <log_file>"
