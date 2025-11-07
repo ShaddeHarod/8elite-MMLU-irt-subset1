@@ -6,7 +6,15 @@
       "Bash(./test_final.sh:*)",
       "Bash(python3:*)",
       "Bash(cat:*)",
-      "Bash(git init:*)"
+      "Bash(git init:*)",
+      "Bash(git commit:*)",
+      "Bash(gh:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "Bash(git add:*)",
+      "Bash(bash:*)",
+      "Bash(adb push:*)",
+      "Bash(adb shell:*)"
     ],
     "deny": [],
     "ask": []
