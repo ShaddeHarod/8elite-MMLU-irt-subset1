@@ -1,0 +1,6 @@
+科目：abstract_algebra
+0. 问题：求 Z_8 x Z_10 x Z_24 某元素的最大可能阶数。 (abstract_algebra)
+A. 8
+B. 120
+C. 240
+D. 24

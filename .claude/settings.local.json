@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__web-search-prime__webSearchPrime",
+      "Bash(chmod:*)",
+      "Bash(./test_final.sh:*)",
+      "Bash(python3:*)",
+      "Bash(cat:*)",
+      "Bash(git init:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
