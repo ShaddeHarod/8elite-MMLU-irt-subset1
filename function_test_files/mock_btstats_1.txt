@@ -1,0 +1,22 @@
+Estimated power use (mAh):
+    Capacity: 6100, Computed drain: 2.00, actual drain: 2.0
+    Global
+      screen: -0.00117431 apps: -0.00117431 duration: -21ms
+      cpu: 0.00313 apps: 0.00284
+      bluetooth: 0.000163 apps: 0
+      sensors: -0.00000124 apps: -0.00000124
+      idle: -0.00003972 apps: 0 duration: -21ms
+    UID 1000: 0.00103 ( cpu=0.00103 sensors=-0.00000109 (-154ms) )
+    UID u0a346: 0.000459 ( cpu=0.000459 )
+    UID 0: 0.000443 ( cpu=0.000443 )
+    UID u0a223: 0.000440 ( cpu=0.000440 )
+    UID u0a171: 0.000230 ( cpu=0.000230 )
+    UID 2000: 0.000101 ( cpu=0.000101 )
+    UID u0a298: 0.0000750 ( cpu=0.0000750 )
+    UID u0a115: 0.0000570 ( cpu=0.0000570 )
+    UID u0a163: 0.00000800 ( cpu=0.00000800 )
+    UID u0a121: -0.00000000 ( sensors=-0.00000000 (-7ms) )
+    UID u0a215: -0.00000000 ( sensors=-0.00000000 (-7ms) )
+    UID u0a253: -0.00000001 ( sensors=-0.00000001 (-21ms) )
+    UID u0a107: -0.00000007 ( sensors=-0.00000007 (-10ms) )
+    UID u0a256: -0.00000007 ( sensors=-0.00000007 (-10ms) )

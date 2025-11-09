@@ -14,7 +14,10 @@
       "Bash(git add:*)",
       "Bash(bash:*)",
       "Bash(adb push:*)",
-      "Bash(adb shell:*)"
+      "Bash(adb shell:*)",
+      "Bash(adb:*)",
+      "WebSearch",
+      "WebFetch(domain:stackoverflow.com)"
     ],
     "deny": [],
     "ask": []

@@ -1,6 +1,6 @@
 #!/system/bin/sh
 # run_adb_model.sh
-# 两阶段功耗测试框架：基线测试 + 实际测试
+# 两阶段耗电量测试框架：基线测试 + 实际测试
 
 # set -e
 
@@ -35,7 +35,7 @@ setup_test_environment() {
     # 设置屏幕亮度（如果需要保持屏幕开启）
     # settings put system screen_brightness 100 >/dev/null 2>&1 || true
 
-    # 禁用网络连接以减少干扰（可选）
+    # 禁用网络连接以减少耗电量测试干扰（可选）
     # svc wifi disable >/dev/null 2>&1 || true
     # svc data disable >/dev/null 2>&1 || true
 
@@ -55,7 +55,7 @@ restore_environment() {
     log_info "环境恢复完成"
 }
 
-# 验证功耗值是否为有效数字
+# 验证耗电量值是否为有效数字
 validate_power_value() {
     local value=$1
     if echo "$value" | grep -qE '^[0-9]+\.?[0-9]*$'; then
@@ -65,13 +65,13 @@ validate_power_value() {
     fi
 }
 
-# 获取batterystats功耗数据
+# 获取batterystats耗电量数据
 get_power_consumption() {
     local start_time=$1
     local end_time=$2
     local test_name=$3
 
-    log_info "获取 $test_name 的功耗数据..."
+    log_info "获取 $test_name 的耗电量数据..."
 
     # 获取电池统计
     local bs_output
@@ -88,7 +88,7 @@ get_power_consumption() {
     local actual_drain_min="-1.0"
     local actual_drain_max="-1.0"
 
-    # 查找 "Estimated power use (mAh):" 部分
+    # 查找 "Estimated power use (mAh):" 部分（这是耗电量数据）
     local power_section
     power_section=$(echo "$bs_output" | awk '/Estimated power use \(mAh\):/{found=1; next} found && /^ /{print} !/^ / && found{exit}')
 
@@ -163,7 +163,7 @@ get_power_consumption() {
             log_info "未找到 actual drain 数据，设置为 -1.0"
         fi
     else
-        log_info "未找到功耗数据部分，所有值设置为 -1.0"
+        log_info "未找到耗电量数据部分，所有值设置为 -1.0"
     fi
 
     # 确保返回有效数值
@@ -177,7 +177,7 @@ get_power_consumption() {
         actual_drain_max="-1.0"
     fi
 
-    log_info "$test_name 功耗结果 - Computed: ${computed_drain} mAh, Actual_min: ${actual_drain_min} mAh, Actual_max: ${actual_drain_max} mAh"
+    log_info "$test_name 耗电量结果 - Computed: ${computed_drain} mAh, Actual_min: ${actual_drain_min} mAh, Actual_max: ${actual_drain_max} mAh"
     echo "$computed_drain $actual_drain_min $actual_drain_max"
 }
 
@@ -298,7 +298,7 @@ run_actual_test() {
         log_info "输出文件不存在，运行时间设置为 -1"
     fi
 
-    # 输出实际测试结果
+    # 输出实际测试耗电量结果
     {
         echo "ACTUAL_TEST_DURATION_MS=$runtime_ms"
         echo "ACTUAL_TEST_DURATION_S=$runtime_s"
@@ -335,7 +335,7 @@ run_baseline_test() {
     local baseline_actual_min_power=$(echo "$baseline_power_result" | awk '{print $2}')
     local baseline_actual_max_power=$(echo "$baseline_power_result" | awk '{print $3}')
 
-    # 输出基线测试结果
+    # 输出基线测试耗电量结果
     {
         echo "BASELINE_TEST_DURATION_MS=$((baseline_end_time - baseline_start_time))"
         echo "BASELINE_TEST_DURATION_S=$test_duration"
@@ -363,7 +363,7 @@ generate_final_report() {
 
     log_info "生成最终报告..."
 
-    # 计算genie实际功耗（三种方式）
+    # 计算genie实际耗电量（三种方式）
     local genie_computed_power="-1.0"
     local genie_actual_min_power="-1.0"
     local genie_actual_max_power="-1.0"
@@ -380,7 +380,7 @@ generate_final_report() {
     local actual_actual_max_valid=false
     local runtime_valid=false
 
-    # 验证基线功耗
+    # 验证基线耗电量
     if echo "$baseline_computed_power" | grep -qE '^-?[0-9]+\.?[0-9]*$' && [ "$baseline_computed_power" != "-1.0" ] && [ "$baseline_computed_power" != "-1" ]; then
         baseline_computed_valid=true
     fi
@@ -391,7 +391,7 @@ generate_final_report() {
         baseline_actual_max_valid=true
     fi
 
-    # 验证实际功耗
+    # 验证实际耗电量
     if echo "$actual_computed_power" | grep -qE '^-?[0-9]+\.?[0-9]*$' && [ "$actual_computed_power" != "-1.0" ] && [ "$actual_computed_power" != "-1" ]; then
         actual_computed_valid=true
     fi
@@ -407,46 +407,109 @@ generate_final_report() {
         runtime_valid=true
     fi
 
-    # 计算净功耗
+    # 计算净耗电量
     if $baseline_computed_valid && $actual_computed_valid; then
         genie_computed_power=$(echo "$actual_computed_power $baseline_computed_power" | awk '{printf "%.3f", $1 - $2}')
-        log_info "计算computed净功耗: $actual_computed_power - $baseline_computed_power = $genie_computed_power mAh"
+        log_info "计算computed净耗电量: $actual_computed_power - $baseline_computed_power = $genie_computed_power mAh"
     else
-        log_info "无法计算computed净功耗 - 基线有效: $baseline_computed_valid, 实际有效: $actual_computed_valid"
+        log_info "无法计算computed净耗电量 - 基线有效: $baseline_computed_valid, 实际有效: $actual_computed_valid"
     fi
 
     if $baseline_actual_min_valid && $actual_actual_min_valid; then
         genie_actual_min_power=$(echo "$actual_actual_min_power $baseline_actual_min_power" | awk '{printf "%.3f", $1 - $2}')
-        log_info "计算actual_min净功耗: $actual_actual_min_power - $baseline_actual_min_power = $genie_actual_min_power mAh"
+        log_info "计算actual_min净耗电量: $actual_actual_min_power - $baseline_actual_min_power = $genie_actual_min_power mAh"
     else
-        log_info "无法计算actual_min净功耗 - 基线有效: $baseline_actual_min_valid, 实际有效: $actual_actual_min_valid"
+        log_info "无法计算actual_min净耗电量 - 基线有效: $baseline_actual_min_valid, 实际有效: $actual_actual_min_valid"
     fi
 
     if $baseline_actual_max_valid && $actual_actual_max_valid; then
         genie_actual_max_power=$(echo "$actual_actual_max_power $baseline_actual_max_power" | awk '{printf "%.3f", $1 - $2}')
-        log_info "计算actual_max净功耗: $actual_actual_max_power - $baseline_actual_max_power = $genie_actual_max_power mAh"
+        log_info "计算actual_max净耗电量: $actual_actual_max_power - $baseline_actual_max_power = $genie_actual_max_power mAh"
     else
-        log_info "无法计算actual_max净功耗 - 基线有效: $baseline_actual_max_valid, 实际有效: $actual_actual_max_valid"
+        log_info "无法计算actual_max净耗电量 - 基线有效: $baseline_actual_max_valid, 实际有效: $actual_actual_max_valid"
     fi
 
-    # 计算平均功耗
+    # 计算基线功耗（基线耗电量 ÷ 基线时间(小时)）
+    local baseline_computed_avg_power="-1.0"
+    local baseline_actual_min_avg_power="-1.0"
+    local baseline_actual_max_avg_power="-1.0"
+
+    if [ "$baseline_duration_s" -gt 0 ]; then
+        # 时间转换为小时
+        local baseline_duration_hours=$(echo "$baseline_duration_s 3600" | awk '{printf "%.6f", $1 / $2}')
+        log_info "基线时间转换: ${baseline_duration_s}秒 = ${baseline_duration_hours}小时"
+
+        if echo "$baseline_computed_power_from_log" | grep -qE '^-?[0-9]+\.?[0-9]*$' && [ "$baseline_computed_power_from_log" != "-1.0" ]; then
+            baseline_computed_avg_power=$(echo "$baseline_computed_power_from_log $baseline_duration_hours" | awk '{printf "%.3f", $1 / $2}')
+            log_info "计算基线computed功耗: ${baseline_computed_power_from_log} mAh ÷ ${baseline_duration_hours} h = $baseline_computed_avg_power mA"
+        fi
+
+        if echo "$baseline_actual_min_power_from_log" | grep -qE '^-?[0-9]+\.?[0-9]*$' && [ "$baseline_actual_min_power_from_log" != "-1.0" ]; then
+            baseline_actual_min_avg_power=$(echo "$baseline_actual_min_power_from_log $baseline_duration_hours" | awk '{printf "%.3f", $1 / $2}')
+            log_info "计算基线actual_min功耗: ${baseline_actual_min_power_from_log} mAh ÷ ${baseline_duration_hours} h = $baseline_actual_min_avg_power mA"
+        fi
+
+        if echo "$baseline_actual_max_power_from_log" | grep -qE '^-?[0-9]+\.?[0-9]*$' && [ "$baseline_actual_max_power_from_log" != "-1.0" ]; then
+            baseline_actual_max_avg_power=$(echo "$baseline_actual_max_power_from_log $baseline_duration_hours" | awk '{printf "%.3f", $1 / $2}')
+            log_info "计算基线actual_max功耗: ${baseline_actual_max_power_from_log} mAh ÷ ${baseline_duration_hours} h = $baseline_actual_max_avg_power mA"
+        fi
+    else
+        log_info "基线时间无效，无法计算基线功耗 - 基线时长: $baseline_duration_s"
+    fi
+
+    # 计算实际功耗（实际耗电量 ÷ 实际时间(小时)）
+    local actual_computed_avg_power="-1.0"
+    local actual_actual_min_avg_power="-1.0"
+    local actual_actual_max_avg_power="-1.0"
+
     if $runtime_valid; then
+        # 时间转换为小时
+        local runtime_hours=$(echo "$runtime_s 3600" | awk '{printf "%.6f", $1 / $2}')
+        log_info "实际时间转换: ${runtime_s}秒 = ${runtime_hours}小时"
+
+        if echo "$actual_computed_power" | grep -qE '^-?[0-9]+\.?[0-9]*$' && [ "$actual_computed_power" != "-1.0" ]; then
+            actual_computed_avg_power=$(echo "$actual_computed_power $runtime_hours" | awk '{printf "%.3f", $1 / $2}')
+            log_info "计算实际computed功耗: ${actual_computed_power} mAh ÷ ${runtime_hours} h = $actual_computed_avg_power mA"
+        fi
+
+        if echo "$actual_actual_min_power" | grep -qE '^-?[0-9]+\.?[0-9]*$' && [ "$actual_actual_min_power" != "-1.0" ]; then
+            actual_actual_min_avg_power=$(echo "$actual_actual_min_power $runtime_hours" | awk '{printf "%.3f", $1 / $2}')
+            log_info "计算实际actual_min功耗: ${actual_actual_min_power} mAh ÷ ${runtime_hours} h = $actual_actual_min_avg_power mA"
+        fi
+
+        if echo "$actual_actual_max_power" | grep -qE '^-?[0-9]+\.?[0-9]*$' && [ "$actual_actual_max_power" != "-1.0" ]; then
+            actual_actual_max_avg_power=$(echo "$actual_actual_max_power $runtime_hours" | awk '{printf "%.3f", $1 / $2}')
+            log_info "计算实际actual_max功耗: ${actual_actual_max_power} mAh ÷ ${runtime_hours} h = $actual_actual_max_avg_power mA"
+        fi
+    else
+        log_info "实际时间无效，无法计算实际功耗 - 运行时间: $runtime_s"
+    fi
+
+    # 计算Genie净功耗（Genie净耗电量 ÷ 实际时间(小时)）
+    local genie_computed_avg_power="-1.0"
+    local genie_actual_min_avg_power="-1.0"
+    local genie_actual_max_avg_power="-1.0"
+
+    if $runtime_valid; then
+        # 使用之前转换的时间
+        log_info "计算Genie净功耗使用时间转换: ${runtime_s}秒 = ${runtime_hours}小时"
+
         if echo "$genie_computed_power" | grep -qE '^-?[0-9]+\.?[0-9]*$' && [ "$genie_computed_power" != "-1.0" ]; then
-            genie_computed_avg_power=$(echo "$genie_computed_power $runtime_s" | awk '{printf "%.3f", $1 / $2}')
-            log_info "计算computed平均功耗: $genie_computed_power / $runtime_s = $genie_computed_avg_power mA"
+            genie_computed_avg_power=$(echo "$genie_computed_power $runtime_hours" | awk '{printf "%.3f", $1 / $2}')
+            log_info "计算Genie computed平均功耗: $genie_computed_power mAh ÷ $runtime_hours h = $genie_computed_avg_power mA"
         fi
 
         if echo "$genie_actual_min_power" | grep -qE '^-?[0-9]+\.?[0-9]*$' && [ "$genie_actual_min_power" != "-1.0" ]; then
-            genie_actual_min_avg_power=$(echo "$genie_actual_min_power $runtime_s" | awk '{printf "%.3f", $1 / $2}')
-            log_info "计算actual_min平均功耗: $genie_actual_min_power / $runtime_s = $genie_actual_min_avg_power mA"
+            genie_actual_min_avg_power=$(echo "$genie_actual_min_power $runtime_hours" | awk '{printf "%.3f", $1 / $2}')
+            log_info "计算Genie actual_min平均功耗: $genie_actual_min_power mAh ÷ $runtime_hours h = $genie_actual_min_avg_power mA"
         fi
 
         if echo "$genie_actual_max_power" | grep -qE '^-?[0-9]+\.?[0-9]*$' && [ "$genie_actual_max_power" != "-1.0" ]; then
-            genie_actual_max_avg_power=$(echo "$genie_actual_max_power $runtime_s" | awk '{printf "%.3f", $1 / $2}')
-            log_info "计算actual_max平均功耗: $genie_actual_max_power / $runtime_s = $genie_actual_max_avg_power mA"
+            genie_actual_max_avg_power=$(echo "$genie_actual_max_power $runtime_hours" | awk '{printf "%.3f", $1 / $2}')
+            log_info "计算Genie actual_max平均功耗: $genie_actual_max_power mAh ÷ $runtime_hours h = $genie_actual_max_avg_power mA"
         fi
     else
-        log_info "无法计算平均功耗 - 运行时间有效: $runtime_valid"
+        log_info "无法计算Genie净功耗 - 运行时间有效: $runtime_valid"
     fi
 
     # 分析内存数据
@@ -469,7 +532,7 @@ generate_final_report() {
         fi
     done 2>/dev/null || true
 
-    # 预计算复杂的awk值（三种功耗方式）
+    # 预计算复杂的awk值（三种耗电量方式）
     local computed_power_per_inference="-1.0"
     local actual_min_power_per_inference="-1.0"
     local actual_max_power_per_inference="-1.0"
@@ -477,23 +540,23 @@ generate_final_report() {
     if [ $process_count -gt 0 ]; then
         if echo "$genie_computed_power" | grep -qE '^-?[0-9]+\.?[0-9]*$' && [ "$genie_computed_power" != "-1.0" ]; then
             computed_power_per_inference=$(echo "$genie_computed_power $process_count" | awk '{printf "%.6f", $1 / $2}')
-            log_info "计算computed每次推理功耗: $genie_computed_power / $process_count = $computed_power_per_inference mAh"
+            log_info "计算computed每次推理耗电量: $genie_computed_power / $process_count = $computed_power_per_inference mAh"
         else
-            log_info "无法计算computed每次推理功耗 - 净功耗: $genie_computed_power, 进程数: $process_count"
+            log_info "无法计算computed每次推理耗电量 - 净耗电量: $genie_computed_power, 进程数: $process_count"
         fi
 
         if echo "$genie_actual_min_power" | grep -qE '^-?[0-9]+\.?[0-9]*$' && [ "$genie_actual_min_power" != "-1.0" ]; then
             actual_min_power_per_inference=$(echo "$genie_actual_min_power $process_count" | awk '{printf "%.6f", $1 / $2}')
-            log_info "计算actual_min每次推理功耗: $genie_actual_min_power / $process_count = $actual_min_power_per_inference mAh"
+            log_info "计算actual_min每次推理耗电量: $genie_actual_min_power / $process_count = $actual_min_power_per_inference mAh"
         else
-            log_info "无法计算actual_min每次推理功耗 - 净功耗: $genie_actual_min_power, 进程数: $process_count"
+            log_info "无法计算actual_min每次推理耗电量 - 净耗电量: $genie_actual_min_power, 进程数: $process_count"
         fi
 
         if echo "$genie_actual_max_power" | grep -qE '^-?[0-9]+\.?[0-9]*$' && [ "$genie_actual_max_power" != "-1.0" ]; then
             actual_max_power_per_inference=$(echo "$genie_actual_max_power $process_count" | awk '{printf "%.6f", $1 / $2}')
-            log_info "计算actual_max每次推理功耗: $genie_actual_max_power / $process_count = $actual_max_power_per_inference mAh"
+            log_info "计算actual_max每次推理耗电量: $genie_actual_max_power / $process_count = $actual_max_power_per_inference mAh"
         else
-            log_info "无法计算actual_max每次推理功耗 - 净功耗: $genie_actual_max_power, 进程数: $process_count"
+            log_info "无法计算actual_max每次推理耗电量 - 净耗电量: $genie_actual_max_power, 进程数: $process_count"
         fi
     fi
 
@@ -505,7 +568,7 @@ generate_final_report() {
         log_info "无法计算每题平均时间 - 运行时间: $runtime_ms, 完成题目数: $completed_questions"
     fi
 
-    # 从日志文件中提取基线测试数据
+    # 从日志文件中提取基线测试耗电量数据
     local baseline_duration_s=-1
     local baseline_computed_power_from_log="-1.0"
     local baseline_actual_min_power_from_log="-1.0"
@@ -520,7 +583,7 @@ generate_final_report() {
             log_info "基线时长数据无效，设置为 -1"
         fi
 
-        # 提取基线功耗（三种）
+        # 提取基线耗电量（三种）
         baseline_computed_power_from_log=$(grep "BASELINE_COMPUTED_POWER_MAH=" "$POWER_LOG_FILE" | tail -1 | cut -d'=' -f2 | tr -d ' \n\r' || echo "-1.0")
         baseline_actual_min_power_from_log=$(grep "BASELINE_ACTUAL_MIN_POWER_MAH=" "$POWER_LOG_FILE" | tail -1 | cut -d'=' -f2 | tr -d ' \n\r' || echo "-1.0")
         baseline_actual_max_power_from_log=$(grep "BASELINE_ACTUAL_MAX_POWER_MAH=" "$POWER_LOG_FILE" | tail -1 | cut -d'=' -f2 | tr -d ' \n\r' || echo "-1.0")
@@ -530,11 +593,11 @@ generate_final_report() {
             local value=$(eval echo \$$var)
             if ! echo "$value" | grep -qE '^[0-9]+\.?[0-9]*$'; then
                 eval "$var=\"-1.0\""
-                log_info "基线${var}数据无效，设置为 -1.0"
+                log_info "基线${var}耗电量数据无效，设置为 -1.0"
             fi
         done
 
-        log_info "从日志提取 - 基线时长: ${baseline_duration_s}s, 基线computed功耗: ${baseline_computed_power_from_log}mAh, 基线actual_min功耗: ${baseline_actual_min_power_from_log}mAh, 基线actual_max功耗: ${baseline_actual_max_power_from_log}mAh"
+        log_info "从日志提取 - 基线时长: ${baseline_duration_s}s, 基线computed耗电量: ${baseline_computed_power_from_log}mAh, 基线actual_min耗电量: ${baseline_actual_min_power_from_log}mAh, 基线actual_max耗电量: ${baseline_actual_max_power_from_log}mAh"
     else
         log_info "日志文件不存在，基线数据设置为 -1"
     fi
@@ -564,8 +627,16 @@ generate_final_report() {
     local safe_actual_max_power_per_inference=${actual_max_power_per_inference:-"-1.0"}
     local safe_avg_time_per_question=${avg_time_per_question:-"-1"}
 
-    # 验证和清理所有功耗数值
-    for var in safe_baseline_computed_power safe_baseline_actual_min_power safe_baseline_actual_max_power safe_actual_computed_power safe_actual_actual_min_power safe_actual_actual_max_power safe_genie_computed_power safe_genie_actual_min_power safe_genie_actual_max_power safe_genie_computed_avg_power safe_genie_actual_min_avg_power safe_genie_actual_max_avg_power safe_computed_power_per_inference safe_actual_min_power_per_inference safe_actual_max_power_per_inference; do
+    # 安全赋值新的功耗变量
+    local safe_baseline_computed_avg_power=${baseline_computed_avg_power:-"-1.0"}
+    local safe_baseline_actual_min_avg_power=${baseline_actual_min_avg_power:-"-1.0"}
+    local safe_baseline_actual_max_avg_power=${baseline_actual_max_avg_power:-"-1.0"}
+    local safe_actual_computed_avg_power=${actual_computed_avg_power:-"-1.0"}
+    local safe_actual_actual_min_avg_power=${actual_actual_min_avg_power:-"-1.0"}
+    local safe_actual_actual_max_avg_power=${actual_actual_max_avg_power:-"-1.0"}
+
+    # 验证和清理所有耗电量数值
+    for var in safe_baseline_computed_power safe_baseline_actual_min_power safe_baseline_actual_max_power safe_actual_computed_power safe_actual_actual_min_power safe_actual_actual_max_power safe_genie_computed_power safe_genie_actual_min_power safe_genie_actual_max_power safe_genie_computed_avg_power safe_genie_actual_min_avg_power safe_genie_actual_max_avg_power safe_computed_power_per_inference safe_actual_min_power_per_inference safe_actual_max_power_per_inference safe_baseline_computed_avg_power safe_baseline_actual_min_avg_power safe_baseline_actual_max_avg_power safe_actual_computed_avg_power safe_actual_actual_min_avg_power safe_actual_actual_max_avg_power; do
         local value=$(eval echo \$$var)
         if ! echo "$value" | grep -qE '^-?[0-9]+\.?[0-9]*$'; then
             eval "$var=\"-1.0\""
@@ -590,12 +661,18 @@ generate_final_report() {
       "computed_power_mah": $safe_baseline_computed_power,
       "actual_power_min_mah": $safe_baseline_actual_min_power,
       "actual_power_max_mah": $safe_baseline_actual_max_power,
+      "computed_average_power_ma": $safe_baseline_computed_avg_power,
+      "actual_min_average_power_ma": $safe_baseline_actual_min_avg_power,
+      "actual_max_average_power_ma": $safe_baseline_actual_max_avg_power,
       "duration_s": $safe_baseline_duration_s
     },
     "actual_test": {
       "computed_power_mah": $safe_actual_computed_power,
       "actual_power_min_mah": $safe_actual_actual_min_power,
       "actual_power_max_mah": $safe_actual_actual_max_power,
+      "computed_average_power_ma": $safe_actual_computed_avg_power,
+      "actual_min_average_power_ma": $safe_actual_actual_min_avg_power,
+      "actual_max_average_power_ma": $safe_actual_actual_max_avg_power,
       "duration_ms": $safe_runtime_ms,
       "duration_s": $safe_runtime_s
     },
@@ -629,10 +706,12 @@ EOF
 
     # 输出关键结果
     echo "=== 测试结果摘要 ==="
-    echo "基线功耗 - Computed: ${baseline_computed_power} mAh, Actual_min: ${baseline_actual_min_power} mAh, Actual_max: ${baseline_actual_max_power} mAh"
-    echo "实际功耗 - Computed: ${actual_computed_power} mAh, Actual_min: ${actual_actual_min_power} mAh, Actual_max: ${actual_actual_max_power} mAh"
-    echo "Genie净功耗 - Computed: ${genie_computed_power} mAh, Actual_min: ${genie_actual_min_power} mAh, Actual_max: ${genie_actual_max_power} mAh"
-    echo "平均功耗 - Computed: ${genie_computed_avg_power} mA, Actual_min: ${genie_actual_min_avg_power} mA, Actual_max: ${genie_actual_max_avg_power} mA"
+    echo "基线耗电量 - Computed: ${baseline_computed_power} mAh, Actual_min: ${baseline_actual_min_power} mAh, Actual_max: ${baseline_actual_max_power} mAh"
+    echo "基线功耗 - Computed: ${baseline_computed_avg_power} mA, Actual_min: ${baseline_actual_min_avg_power} mA, Actual_max: ${baseline_actual_max_avg_power} mA"
+    echo "实际耗电量 - Computed: ${actual_computed_power} mAh, Actual_min: ${actual_actual_min_power} mAh, Actual_max: ${actual_actual_max_power} mAh"
+    echo "实际功耗 - Computed: ${actual_computed_avg_power} mA, Actual_min: ${actual_actual_min_avg_power} mA, Actual_max: ${actual_actual_max_avg_power} mA"
+    echo "Genie净耗电量 - Computed: ${genie_computed_power} mAh, Actual_min: ${genie_actual_min_power} mAh, Actual_max: ${genie_actual_max_power} mAh"
+    echo "Genie净功耗 - Computed: ${genie_computed_avg_power} mA, Actual_min: ${genie_actual_min_avg_power} mA, Actual_max: ${genie_actual_max_avg_power} mA"
     echo "推理进程数: $process_count"
     echo "完成题目数: $completed_questions"
     echo "详细报告: $FINAL_REPORT_FILE"
@@ -640,7 +719,7 @@ EOF
 
 # 主函数
 main() {
-    log_info "=== 开始两阶段功耗测试 ==="
+    log_info "=== 开始两阶段耗电量测试 ==="
 
     # 设置环境
     setup_test_environment
@@ -675,7 +754,7 @@ main() {
     # 恢复环境
     restore_environment
 
-    log_info "=== 两阶段功耗测试完成 ==="
+    log_info "=== 两阶段耗电量测试完成 ==="
 }
 
 # 错误处理
