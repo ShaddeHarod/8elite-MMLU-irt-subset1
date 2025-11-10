@@ -1,0 +1,43 @@
+{
+  "subject": "college_computer_science",
+  "total_questions": 3,
+  "correct_count": 1,
+  "wrong_count": 2,
+  "accuracy_rate": 0.3333,
+  "answer_not_found": {
+    "count": 0,
+    "question_indices": []
+  },
+  "performance_metrics": {
+    "avg_prompt_processing_rate_toks_per_sec": 1283.797,
+    "avg_token_generation_rate_toks_per_sec": 35.029,
+    "total_processed_answers": 3
+  },
+  "detailed_metrics": {
+    "init_time_us": [
+      1071091.0,
+      1070100.0,
+      1080441.0
+    ],
+    "prompt_processing_time_us": [
+      227378.0,
+      150674.0,
+      153635.0
+    ],
+    "prompt_processing_rate_toks_per_sec": [
+      1394.700195,
+      1128.668213,
+      1328.02124
+    ],
+    "token_generation_time_us": [
+      113806.0,
+      114630.0,
+      114146.0
+    ],
+    "token_generation_rate_toks_per_sec": [
+      35.148148,
+      34.895489,
+      35.043453
+    ]
+  }
+}

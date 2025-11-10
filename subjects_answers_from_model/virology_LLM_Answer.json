@@ -1,0 +1,81 @@
+{
+  "subject": "virology",
+  "answers": [
+    {
+      "question_index": 0,
+      "global_index": 0,
+      "start_timestamp": "2025-11-09 22:14:38",
+      "final_answer": "A",
+      "model_output": "
+答案：A
+
+",
+      "performance_metrics": {
+        "init_time_us": 1042090,
+        "prompt_processing_time_us": 168650,
+        "prompt_processing_rate_toks_per_sec": 842.459961,
+        "token_generation_time_us": 112352,
+        "token_generation_rate_toks_per_sec": 35.602394
+      },
+      "end_timestamp": "2025-11-09 22:14:39"
+    }
+,
+    {
+      "question_index": 1,
+      "global_index": 1,
+      "start_timestamp": "2025-11-09 22:14:40",
+      "final_answer": "D",
+      "model_output": "
+答案：D
+
+",
+      "performance_metrics": {
+        "init_time_us": 1040770,
+        "prompt_processing_time_us": 153838,
+        "prompt_processing_rate_toks_per_sec": 968.992249,
+        "token_generation_time_us": 112585,
+        "token_generation_rate_toks_per_sec": 35.529026
+      },
+      "end_timestamp": "2025-11-09 22:14:41"
+    }
+,
+    {
+      "question_index": 2,
+      "global_index": 2,
+      "start_timestamp": "2025-11-09 22:14:41",
+      "final_answer": "C",
+      "model_output": "
+答案：C
+
+",
+      "performance_metrics": {
+        "init_time_us": 1064945,
+        "prompt_processing_time_us": 149807,
+        "prompt_processing_rate_toks_per_sec": 955.109863,
+        "token_generation_time_us": 113256,
+        "token_generation_rate_toks_per_sec": 35.318218
+      },
+      "end_timestamp": "2025-11-09 22:14:43"
+    }
+,
+    {
+      "question_index": 3,
+      "global_index": 3,
+      "start_timestamp": "2025-11-09 22:14:43",
+      "final_answer": "A",
+      "model_output": "
+答案：A
+
+",
+      "performance_metrics": {
+        "init_time_us": 1055946,
+        "prompt_processing_time_us": 149951,
+        "prompt_processing_rate_toks_per_sec": 1067.235840,
+        "token_generation_time_us": 113694,
+        "token_generation_rate_toks_per_sec": 35.182774
+      },
+      "end_timestamp": "2025-11-09 22:14:44"
+    }
+
+  ]
+}

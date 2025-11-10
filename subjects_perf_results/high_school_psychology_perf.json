@@ -1,0 +1,83 @@
+{
+  "subject": "high_school_psychology",
+  "total_questions": 11,
+  "correct_count": 8,
+  "wrong_count": 3,
+  "accuracy_rate": 0.7273,
+  "answer_not_found": {
+    "count": 0,
+    "question_indices": []
+  },
+  "performance_metrics": {
+    "avg_prompt_processing_rate_toks_per_sec": 965.636,
+    "avg_token_generation_rate_toks_per_sec": 35.306,
+    "total_processed_answers": 11
+  },
+  "detailed_metrics": {
+    "init_time_us": [
+      1051320.0,
+      1076924.0,
+      1082296.0,
+      1116458.0,
+      1078230.0,
+      1072526.0,
+      1041012.0,
+      1080486.0,
+      1095559.0,
+      1084867.0,
+      1058183.0
+    ],
+    "prompt_processing_time_us": [
+      156127.0,
+      151627.0,
+      151894.0,
+      152211.0,
+      152708.0,
+      154805.0,
+      170250.0,
+      151095.0,
+      151654.0,
+      151837.0,
+      152914.0
+    ],
+    "prompt_processing_rate_toks_per_sec": [
+      909.918091,
+      1161.440186,
+      1053.740723,
+      913.242004,
+      891.265625,
+      968.992249,
+      981.354248,
+      919.963196,
+      890.471924,
+      1048.218018,
+      883.392212
+    ],
+    "token_generation_time_us": [
+      114731.0,
+      113054.0,
+      112782.0,
+      112975.0,
+      113046.0,
+      113811.0,
+      113172.0,
+      113557.0,
+      112540.0,
+      113232.0,
+      113388.0
+    ],
+    "token_generation_rate_toks_per_sec": [
+      34.86507,
+      35.381947,
+      35.467281,
+      35.407005,
+      35.384453,
+      35.146915,
+      35.344433,
+      35.224911,
+      35.542919,
+      35.325703,
+      35.277103
+    ]
+  }
+}

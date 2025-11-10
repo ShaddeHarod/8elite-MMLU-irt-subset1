@@ -1,0 +1,48 @@
+{
+  "subject": "sociology",
+  "total_questions": 4,
+  "correct_count": 2,
+  "wrong_count": 2,
+  "accuracy_rate": 0.5,
+  "answer_not_found": {
+    "count": 0,
+    "question_indices": []
+  },
+  "performance_metrics": {
+    "avg_prompt_processing_rate_toks_per_sec": 1078.872,
+    "avg_token_generation_rate_toks_per_sec": 35.451,
+    "total_processed_answers": 4
+  },
+  "detailed_metrics": {
+    "init_time_us": [
+      1081103.0,
+      1101397.0,
+      1069357.0,
+      1074339.0
+    ],
+    "prompt_processing_time_us": [
+      152973.0,
+      152351.0,
+      150135.0,
+      152356.0
+    ],
+    "prompt_processing_rate_toks_per_sec": [
+      1190.476196,
+      1037.34436,
+      872.600342,
+      1215.066772
+    ],
+    "token_generation_time_us": [
+      112658.0,
+      112600.0,
+      113166.0,
+      112912.0
+    ],
+    "token_generation_rate_toks_per_sec": [
+      35.506321,
+      35.523979,
+      35.346931,
+      35.425819
+    ]
+  }
+}

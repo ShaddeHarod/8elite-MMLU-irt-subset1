@@ -1,0 +1,33 @@
+{
+  "subject": "world_religions",
+  "total_questions": 1,
+  "correct_count": 0,
+  "wrong_count": 1,
+  "accuracy_rate": 0.0,
+  "answer_not_found": {
+    "count": 0,
+    "question_indices": []
+  },
+  "performance_metrics": {
+    "avg_prompt_processing_rate_toks_per_sec": 988.142,
+    "avg_token_generation_rate_toks_per_sec": 35.549,
+    "total_processed_answers": 1
+  },
+  "detailed_metrics": {
+    "init_time_us": [
+      1012377.0
+    ],
+    "prompt_processing_time_us": [
+      152885.0
+    ],
+    "prompt_processing_rate_toks_per_sec": [
+      988.142273
+    ],
+    "token_generation_time_us": [
+      112522.0
+    ],
+    "token_generation_rate_toks_per_sec": [
+      35.549236
+    ]
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "subject": "college_physics",
+  "answers": [
+    {
+      "question_index": 0,
+      "global_index": 0,
+      "start_timestamp": "2025-11-09 22:07:13",
+      "final_answer": "A",
+      "model_output": "
+答案：A
+
+",
+      "performance_metrics": {
+        "init_time_us": 1047034,
+        "prompt_processing_time_us": 152183,
+        "prompt_processing_rate_toks_per_sec": 1360.544189,
+        "token_generation_time_us": 112799,
+        "token_generation_rate_toks_per_sec": 35.462250
+      },
+      "end_timestamp": "2025-11-09 22:07:14"
+    }
+,
+    {
+      "question_index": 1,
+      "global_index": 1,
+      "start_timestamp": "2025-11-09 22:07:14",
+      "final_answer": "A",
+      "model_output": "
+答案：A
+
+",
+      "performance_metrics": {
+        "init_time_us": 1053727,
+        "prompt_processing_time_us": 151625,
+        "prompt_processing_rate_toks_per_sec": 1102.535889,
+        "token_generation_time_us": 113419,
+        "token_generation_rate_toks_per_sec": 35.268391
+      },
+      "end_timestamp": "2025-11-09 22:07:16"
+    }
+,
+    {
+      "question_index": 2,
+      "global_index": 2,
+      "start_timestamp": "2025-11-09 22:07:16",
+      "final_answer": "C",
+      "model_output": "
+答案：C
+
+",
+      "performance_metrics": {
+        "init_time_us": 1064481,
+        "prompt_processing_time_us": 153057,
+        "prompt_processing_rate_toks_per_sec": 1013.171204,
+        "token_generation_time_us": 112756,
+        "token_generation_rate_toks_per_sec": 35.474831
+      },
+      "end_timestamp": "2025-11-09 22:07:18"
+    }
+,
+    {
+      "question_index": 3,
+      "global_index": 3,
+      "start_timestamp": "2025-11-09 22:07:18",
+      "final_answer": "C",
+      "model_output": "
+答案：C
+
+",
+      "performance_metrics": {
+        "init_time_us": 1136277,
+        "prompt_processing_time_us": 151677,
+        "prompt_processing_rate_toks_per_sec": 1108.647461,
+        "token_generation_time_us": 113862,
+        "token_generation_rate_toks_per_sec": 35.130863
+      },
+      "end_timestamp": "2025-11-09 22:07:19"
+    }
+,
+    {
+      "question_index": 4,
+      "global_index": 4,
+      "start_timestamp": "2025-11-09 22:07:20",
+      "final_answer": "C",
+      "model_output": "
+答案：C
+
+",
+      "performance_metrics": {
+        "init_time_us": 1073346,
+        "prompt_processing_time_us": 153543,
+        "prompt_processing_rate_toks_per_sec": 1191.895142,
+        "token_generation_time_us": 114561,
+        "token_generation_rate_toks_per_sec": 34.916203
+      },
+      "end_timestamp": "2025-11-09 22:07:21"
+    }
+
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "subject": "management",
+  "total_questions": 3,
+  "correct_count": 2,
+  "wrong_count": 1,
+  "accuracy_rate": 0.6667,
+  "answer_not_found": {
+    "count": 0,
+    "question_indices": []
+  },
+  "performance_metrics": {
+    "avg_prompt_processing_rate_toks_per_sec": 1142.342,
+    "avg_token_generation_rate_toks_per_sec": 35.788,
+    "total_processed_answers": 3
+  },
+  "detailed_metrics": {
+    "init_time_us": [
+      1051142.0,
+      1089795.0,
+      1066659.0
+    ],
+    "prompt_processing_time_us": [
+      76907.0,
+      151171.0,
+      153259.0
+    ],
+    "prompt_processing_rate_toks_per_sec": [
+      1626.016235,
+      867.302673,
+      933.706787
+    ],
+    "token_generation_time_us": [
+      111790.0,
+      111382.0,
+      112142.0
+    ],
+    "token_generation_rate_toks_per_sec": [
+      35.782017,
+      35.91309,
+      35.669697
+    ]
+  }
+}

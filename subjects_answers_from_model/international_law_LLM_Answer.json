@@ -1,0 +1,43 @@
+{
+  "subject": "international_law",
+  "answers": [
+    {
+      "question_index": 0,
+      "global_index": 0,
+      "start_timestamp": "2025-11-09 22:12:12",
+      "final_answer": "C",
+      "model_output": "
+答案：C
+
+",
+      "performance_metrics": {
+        "init_time_us": 1065063,
+        "prompt_processing_time_us": 331204,
+        "prompt_processing_rate_toks_per_sec": 655.307983,
+        "token_generation_time_us": 234146,
+        "token_generation_rate_toks_per_sec": 17.083504
+      },
+      "end_timestamp": "2025-11-09 22:12:13"
+    }
+,
+    {
+      "question_index": 1,
+      "global_index": 1,
+      "start_timestamp": "2025-11-09 22:12:14",
+      "final_answer": "A",
+      "model_output": "
+答案：A
+
+",
+      "performance_metrics": {
+        "init_time_us": 1031854,
+        "prompt_processing_time_us": 152202,
+        "prompt_processing_rate_toks_per_sec": 1295.336792,
+        "token_generation_time_us": 113340,
+        "token_generation_rate_toks_per_sec": 35.292042
+      },
+      "end_timestamp": "2025-11-09 22:12:15"
+    }
+
+  ]
+}

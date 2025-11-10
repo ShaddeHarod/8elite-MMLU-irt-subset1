@@ -1,0 +1,53 @@
+{
+  "subject": "computer_security",
+  "total_questions": 5,
+  "correct_count": 3,
+  "wrong_count": 2,
+  "accuracy_rate": 0.6,
+  "answer_not_found": {
+    "count": 0,
+    "question_indices": []
+  },
+  "performance_metrics": {
+    "avg_prompt_processing_rate_toks_per_sec": 1062.244,
+    "avg_token_generation_rate_toks_per_sec": 35.23,
+    "total_processed_answers": 5
+  },
+  "detailed_metrics": {
+    "init_time_us": [
+      1029639.0,
+      1074867.0,
+      1130034.0,
+      1099914.0,
+      1094051.0
+    ],
+    "prompt_processing_time_us": [
+      150411.0,
+      79051.0,
+      150778.0,
+      151589.0,
+      153778.0
+    ],
+    "prompt_processing_rate_toks_per_sec": [
+      904.977356,
+      1582.278442,
+      982.318298,
+      924.214417,
+      917.431213
+    ],
+    "token_generation_time_us": [
+      113563.0,
+      112410.0,
+      112332.0,
+      115965.0,
+      113519.0
+    ],
+    "token_generation_rate_toks_per_sec": [
+      35.223671,
+      35.584656,
+      35.60873,
+      34.493462,
+      35.237324
+    ]
+  }
+}

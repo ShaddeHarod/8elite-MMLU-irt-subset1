@@ -1,0 +1,81 @@
+{
+  "subject": "high_school_computer_science",
+  "answers": [
+    {
+      "question_index": 0,
+      "global_index": 0,
+      "start_timestamp": "2025-11-09 22:09:22",
+      "final_answer": "B",
+      "model_output": "
+答案：B
+
+",
+      "performance_metrics": {
+        "init_time_us": 1071218,
+        "prompt_processing_time_us": 151130,
+        "prompt_processing_rate_toks_per_sec": 906.618286,
+        "token_generation_time_us": 112249,
+        "token_generation_rate_toks_per_sec": 35.635380
+      },
+      "end_timestamp": "2025-11-09 22:09:24"
+    }
+,
+    {
+      "question_index": 1,
+      "global_index": 1,
+      "start_timestamp": "2025-11-09 22:09:24",
+      "final_answer": "C",
+      "model_output": "
+答案：C
+
+",
+      "performance_metrics": {
+        "init_time_us": 1053997,
+        "prompt_processing_time_us": 150385,
+        "prompt_processing_rate_toks_per_sec": 891.265625,
+        "token_generation_time_us": 113688,
+        "token_generation_rate_toks_per_sec": 35.184013
+      },
+      "end_timestamp": "2025-11-09 22:09:25"
+    }
+,
+    {
+      "question_index": 2,
+      "global_index": 2,
+      "start_timestamp": "2025-11-09 22:09:25",
+      "final_answer": "D",
+      "model_output": "
+答案：D
+
+",
+      "performance_metrics": {
+        "init_time_us": 1100671,
+        "prompt_processing_time_us": 157415,
+        "prompt_processing_rate_toks_per_sec": 1221.001221,
+        "token_generation_time_us": 115884,
+        "token_generation_rate_toks_per_sec": 34.517277
+      },
+      "end_timestamp": "2025-11-09 22:09:27"
+    }
+,
+    {
+      "question_index": 3,
+      "global_index": 3,
+      "start_timestamp": "2025-11-09 22:09:27",
+      "final_answer": "B",
+      "model_output": "
+答案：B
+
+",
+      "performance_metrics": {
+        "init_time_us": 1055480,
+        "prompt_processing_time_us": 152671,
+        "prompt_processing_rate_toks_per_sec": 1310.615967,
+        "token_generation_time_us": 113234,
+        "token_generation_rate_toks_per_sec": 35.325703
+      },
+      "end_timestamp": "2025-11-09 22:09:29"
+    }
+
+  ]
+}

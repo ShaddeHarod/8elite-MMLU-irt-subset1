@@ -1,0 +1,73 @@
+{
+  "subject": "astronomy",
+  "total_questions": 9,
+  "correct_count": 5,
+  "wrong_count": 4,
+  "accuracy_rate": 0.5556,
+  "answer_not_found": {
+    "count": 0,
+    "question_indices": []
+  },
+  "performance_metrics": {
+    "avg_prompt_processing_rate_toks_per_sec": 1043.352,
+    "avg_token_generation_rate_toks_per_sec": 33.551,
+    "total_processed_answers": 9
+  },
+  "detailed_metrics": {
+    "init_time_us": [
+      1314428.0,
+      1193013.0,
+      1125942.0,
+      1113887.0,
+      1019287.0,
+      1127498.0,
+      1087177.0,
+      1173696.0,
+      1396827.0
+    ],
+    "prompt_processing_time_us": [
+      152585.0,
+      150542.0,
+      155558.0,
+      157718.0,
+      232598.0,
+      321533.0,
+      151934.0,
+      158349.0,
+      152751.0
+    ],
+    "prompt_processing_rate_toks_per_sec": [
+      1141.55249,
+      1156.069336,
+      957.854431,
+      1103.752808,
+      1135.07373,
+      616.142944,
+      1152.07373,
+      1118.568237,
+      1009.081726
+    ],
+    "token_generation_time_us": [
+      113086.0,
+      111962.0,
+      118022.0,
+      112740.0,
+      111637.0,
+      209285.0,
+      112619.0,
+      111887.0,
+      113393.0
+    ],
+    "token_generation_rate_toks_per_sec": [
+      35.371937,
+      35.727047,
+      33.892559,
+      35.479866,
+      35.830734,
+      19.112785,
+      35.518932,
+      35.751312,
+      35.275856
+    ]
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "subject": "marketing",
+  "answers": [
+    {
+      "question_index": 0,
+      "global_index": 0,
+      "start_timestamp": "2025-11-09 22:12:31",
+      "final_answer": "B",
+      "model_output": "
+答案：B
+
+",
+      "performance_metrics": {
+        "init_time_us": 1062296,
+        "prompt_processing_time_us": 154376,
+        "prompt_processing_rate_toks_per_sec": 958.772766,
+        "token_generation_time_us": 115958,
+        "token_generation_rate_toks_per_sec": 34.495842
+      },
+      "end_timestamp": "2025-11-09 22:12:32"
+    }
+,
+    {
+      "question_index": 1,
+      "global_index": 1,
+      "start_timestamp": "2025-11-09 22:12:32",
+      "final_answer": "B",
+      "model_output": "
+答案：B
+
+",
+      "performance_metrics": {
+        "init_time_us": 1087916,
+        "prompt_processing_time_us": 152618,
+        "prompt_processing_rate_toks_per_sec": 911.577026,
+        "token_generation_time_us": 113036,
+        "token_generation_rate_toks_per_sec": 35.386955
+      },
+      "end_timestamp": "2025-11-09 22:12:34"
+    }
+
+  ]
+}

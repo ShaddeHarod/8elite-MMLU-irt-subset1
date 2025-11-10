@@ -1,0 +1,53 @@
+{
+  "subject": "college_biology",
+  "total_questions": 5,
+  "correct_count": 2,
+  "wrong_count": 3,
+  "accuracy_rate": 0.4,
+  "answer_not_found": {
+    "count": 0,
+    "question_indices": []
+  },
+  "performance_metrics": {
+    "avg_prompt_processing_rate_toks_per_sec": 957.015,
+    "avg_token_generation_rate_toks_per_sec": 28.435,
+    "total_processed_answers": 5
+  },
+  "detailed_metrics": {
+    "init_time_us": [
+      1038077.0,
+      1104934.0,
+      1040068.0,
+      1063387.0,
+      1102461.0
+    ],
+    "prompt_processing_time_us": [
+      152267.0,
+      154331.0,
+      153989.0,
+      314286.0,
+      329299.0
+    ],
+    "prompt_processing_rate_toks_per_sec": [
+      952.380981,
+      1322.751343,
+      1605.136475,
+      455.166138,
+      449.640289
+    ],
+    "token_generation_time_us": [
+      113316.0,
+      112907.0,
+      111965.0,
+      215590.0,
+      232975.0
+    ],
+    "token_generation_rate_toks_per_sec": [
+      35.299515,
+      35.428329,
+      35.725769,
+      18.553909,
+      17.169445
+    ]
+  }
+}

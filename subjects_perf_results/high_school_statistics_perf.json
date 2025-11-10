@@ -1,0 +1,53 @@
+{
+  "subject": "high_school_statistics",
+  "total_questions": 5,
+  "correct_count": 4,
+  "wrong_count": 1,
+  "accuracy_rate": 0.8,
+  "answer_not_found": {
+    "count": 0,
+    "question_indices": []
+  },
+  "performance_metrics": {
+    "avg_prompt_processing_rate_toks_per_sec": 1223.355,
+    "avg_token_generation_rate_toks_per_sec": 35.495,
+    "total_processed_answers": 5
+  },
+  "detailed_metrics": {
+    "init_time_us": [
+      1069073.0,
+      1052393.0,
+      1068702.0,
+      1084972.0,
+      1071388.0
+    ],
+    "prompt_processing_time_us": [
+      225290.0,
+      227939.0,
+      156266.0,
+      151817.0,
+      154823.0
+    ],
+    "prompt_processing_rate_toks_per_sec": [
+      1221.001221,
+      1221.001221,
+      1152.07373,
+      1385.041504,
+      1137.656372
+    ],
+    "token_generation_time_us": [
+      112743.0,
+      110584.0,
+      112911.0,
+      113843.0,
+      113440.0
+    ],
+    "token_generation_rate_toks_per_sec": [
+      35.479866,
+      36.171597,
+      35.427074,
+      35.137035,
+      35.260929
+    ]
+  }
+}

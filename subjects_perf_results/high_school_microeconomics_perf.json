@@ -1,0 +1,78 @@
+{
+  "subject": "high_school_microeconomics",
+  "total_questions": 10,
+  "correct_count": 6,
+  "wrong_count": 4,
+  "accuracy_rate": 0.6,
+  "answer_not_found": {
+    "count": 0,
+    "question_indices": []
+  },
+  "performance_metrics": {
+    "avg_prompt_processing_rate_toks_per_sec": 1043.06,
+    "avg_token_generation_rate_toks_per_sec": 34.338,
+    "total_processed_answers": 10
+  },
+  "detailed_metrics": {
+    "init_time_us": [
+      1056386.0,
+      1079904.0,
+      1083870.0,
+      1056514.0,
+      1138837.0,
+      1060305.0,
+      1054658.0,
+      1096081.0,
+      1081776.0,
+      1071660.0
+    ],
+    "prompt_processing_time_us": [
+      151192.0,
+      152905.0,
+      153241.0,
+      154189.0,
+      152720.0,
+      152425.0,
+      154242.0,
+      155099.0,
+      155309.0,
+      151295.0
+    ],
+    "prompt_processing_rate_toks_per_sec": [
+      1038.421631,
+      889.679688,
+      966.183594,
+      1141.55249,
+      1009.081726,
+      1161.440186,
+      946.969727,
+      968.054199,
+      959.692871,
+      1349.52771
+    ],
+    "token_generation_time_us": [
+      113591.0,
+      115559.0,
+      112097.0,
+      486436.0,
+      114813.0,
+      113706.0,
+      115825.0,
+      117137.0,
+      113775.0,
+      113549.0
+    ],
+    "token_generation_rate_toks_per_sec": [
+      35.214989,
+      34.61525,
+      35.683701,
+      28.78112,
+      34.839565,
+      35.179062,
+      34.535156,
+      34.148342,
+      35.158035,
+      35.227394
+    ]
+  }
+}

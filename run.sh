@@ -1,6 +1,6 @@
 #!/system/bin/sh
 # run_adb_model.sh
-# 两阶段耗电量测试框架：基线测试 + 实际测试
+# 两阶段耗电量测试框架：LLM 测试 + 无LLM baseline 测试
 
 # set -e
 
@@ -10,7 +10,7 @@ mkdir -p result
 TEST_SCRIPT="read_all_subjects_prompts.sh"
 OUTPUT_FILE="output.txt"
 POWER_LOG_FILE="power_consumption.log"
-FINAL_REPORT_FILE="result/FINAL_POWER_REPORT.json"
+POWER_MEM_REPORT_FILE="result/POWER_MEM_REPORT.json"
 
 # 日志函数
 log_info() {
@@ -79,7 +79,7 @@ get_power_consumption() {
 
     if [ -z "$bs_output" ]; then
         log_error "无法获取电池统计数据"
-        echo "-1.0 -1.0 -1.0"
+        echo "-1.0 -1.0 -1.0 -1.0"
         return 1
     fi
 
@@ -87,6 +87,7 @@ get_power_consumption() {
     local computed_drain="-1.0"
     local actual_drain_min="-1.0"
     local actual_drain_max="-1.0"
+    local soc_power_mah="-1.0"
 
     # 查找 "Estimated power use (mAh):" 部分（这是耗电量数据）
     local power_section
@@ -166,6 +167,31 @@ get_power_consumption() {
         log_info "未找到耗电量数据部分，所有值设置为 -1.0"
     fi
 
+    # 提取SoC耗电量（从Global部分的cpu行获取）
+    if [ -n "$power_section" ]; then
+        echo "DEBUG: 开始提取SoC耗电量" >&2
+        soc_power_mah=$(echo "$power_section" | sed -n '/^    Global$/,/^[^ ]/ {
+  /^      cpu: /{
+    s/^      cpu: \([0-9.-]*\).*$/\1/p
+    q
+  }
+}')
+        echo "DEBUG: 提取的 soc_power_mah 原始值: '$soc_power_mah'" >&2
+
+        # 验证SoC耗电量值
+        if [ -n "$soc_power_mah" ] && validate_power_value "$soc_power_mah"; then
+            echo "DEBUG: soc_power_mah 验证通过" >&2
+            log_info "SoC耗电量（来自Global CPU）: ${soc_power_mah} mAh"
+        else
+            echo "DEBUG: soc_power_mah 验证失败，设置为 -1.0" >&2
+            soc_power_mah="-1.0"
+            log_info "SoC耗电量无效，设置为 -1.0"
+        fi
+    else
+        log_info "未找到耗电量数据部分，SoC耗电量设置为 -1.0"
+        soc_power_mah="-1.0"
+    fi
+
     # 确保返回有效数值
     if [ -z "$computed_drain" ] || [ "$computed_drain" = "0" ]; then
         computed_drain="-1.0"
@@ -176,9 +202,12 @@ get_power_consumption() {
     if [ -z "$actual_drain_max" ] || [ "$actual_drain_max" = "0" ]; then
         actual_drain_max="-1.0"
     fi
+    if [ -z "$soc_power_mah" ] || [ "$soc_power_mah" = "0" ]; then
+        soc_power_mah="-1.0"
+    fi
 
-    log_info "$test_name 耗电量结果 - Computed: ${computed_drain} mAh, Actual_min: ${actual_drain_min} mAh, Actual_max: ${actual_drain_max} mAh"
-    echo "$computed_drain $actual_drain_min $actual_drain_max"
+    log_info "$test_name 耗电量结果 - Computed: ${computed_drain} mAh, Actual_min: ${actual_drain_min} mAh, Actual_max: ${actual_drain_max} mAh, SoC: ${soc_power_mah} mAh"
+    echo "$computed_drain $actual_drain_min $actual_drain_max $soc_power_mah"
 }
 
 # 分析内存数据（从read_all_subjects_prompts.sh移动过来）
@@ -250,13 +279,13 @@ analyze_memory_data() {
 EOF
 }
 
-# Phase 1: 实际测试
+# Phase 1: LLM测试
 run_actual_test() {
-    log_info "=== Phase 1: 实际测试开始 ==="
+    log_info "=== Phase 1: LLM测试开始 ==="
 
     # 重置电池统计
     dumpsys batterystats --reset >/dev/null 2>&1
-    local actual_start_time=$(date +%s%3N)
+    local actual_start_time=$(date '+%Y-%m-%d %H:%M:%S')
 
     # 运行实际的推理脚本
     log_info "开始运行推理测试..."
@@ -268,14 +297,15 @@ run_actual_test() {
         return 1
     fi
 
-    local actual_end_time=$(date +%s%3N)
+    local actual_end_time=$(date '+%Y-%m-%d %H:%M:%S')
     local actual_power_result
-    actual_power_result=$(get_power_consumption "$actual_start_time" "$actual_end_time" "实际测试")
+    actual_power_result=$(get_power_consumption "$actual_start_time" "$actual_end_time" "LLM测试")
 
-    # 解析功耗结果（三个值：computed actual_min actual_max）
+    # 解析功耗结果（四个值：computed actual_min actual_max soc）
     local actual_computed_power=$(echo "$actual_power_result" | awk '{print $1}')
     local actual_actual_min_power=$(echo "$actual_power_result" | awk '{print $2}')
     local actual_actual_max_power=$(echo "$actual_power_result" | awk '{print $3}')
+    local actual_soc_power=$(echo "$actual_power_result" | awk '{print $4}')
 
     # 从输出中提取运行时间
     local runtime_ms=-1
@@ -298,17 +328,20 @@ run_actual_test() {
         log_info "输出文件不存在，运行时间设置为 -1"
     fi
 
-    # 输出实际测试耗电量结果
+    # 输出LLM测试耗电量结果
     {
-        echo "ACTUAL_TEST_DURATION_MS=$runtime_ms"
-        echo "ACTUAL_TEST_DURATION_S=$runtime_s"
-        echo "ACTUAL_COMPUTED_POWER_MAH=$actual_computed_power"
-        echo "ACTUAL_ACTUAL_MIN_POWER_MAH=$actual_actual_min_power"
-        echo "ACTUAL_ACTUAL_MAX_POWER_MAH=$actual_actual_max_power"
+        echo "LLM_TEST_START_TIMESTAMP=$actual_start_time"
+        echo "LLM_TEST_END_TIMESTAMP=$actual_end_time"
+        echo "LLM_TEST_DURATION_MS=$runtime_ms"
+        echo "LLM_TEST_DURATION_S=$runtime_s"
+        echo "LLM_COMPUTED_POWER_MAH=$actual_computed_power"
+        echo "LLM_ACTUAL_MIN_POWER_MAH=$actual_actual_min_power"
+        echo "LLM_ACTUAL_MAX_POWER_MAH=$actual_actual_max_power"
+        echo "LLM_SOC_POWER_MAH=$actual_soc_power"
     } >> "$POWER_LOG_FILE"
 
-    log_info "=== Phase 2: 实际测试完成 ==="
-    echo "$actual_computed_power" "$actual_actual_min_power" "$actual_actual_max_power" "$runtime_ms" "$runtime_s"
+    log_info "=== Phase 2: LLM测试完成 ==="
+    echo "$actual_computed_power" "$actual_actual_min_power" "$actual_actual_max_power" "$actual_soc_power" "$runtime_ms" "$runtime_s" "$actual_start_time" "$actual_end_time"
 }
 
 # Phase 2: 基线测试（空闲运行相同时间）
@@ -327,25 +360,28 @@ run_baseline_test() {
     sleep "$test_duration"
 
     local baseline_end_time=$(date +%s%3N)
+    local baseline_duration_ms=$((baseline_end_time - baseline_start_time))
     local baseline_power_result
     baseline_power_result=$(get_power_consumption "$baseline_start_time" "$baseline_end_time" "基线测试")
 
-    # 解析功耗结果（三个值：computed actual_min actual_max）
+    # 解析功耗结果（四个值：computed actual_min actual_max soc）
     local baseline_computed_power=$(echo "$baseline_power_result" | awk '{print $1}')
     local baseline_actual_min_power=$(echo "$baseline_power_result" | awk '{print $2}')
     local baseline_actual_max_power=$(echo "$baseline_power_result" | awk '{print $3}')
+    local baseline_soc_power=$(echo "$baseline_power_result" | awk '{print $4}')
 
     # 输出基线测试耗电量结果
     {
-        echo "BASELINE_TEST_DURATION_MS=$((baseline_end_time - baseline_start_time))"
+        echo "BASELINE_TEST_DURATION_MS=$baseline_duration_ms"
         echo "BASELINE_TEST_DURATION_S=$test_duration"
         echo "BASELINE_COMPUTED_POWER_MAH=$baseline_computed_power"
         echo "BASELINE_ACTUAL_MIN_POWER_MAH=$baseline_actual_min_power"
         echo "BASELINE_ACTUAL_MAX_POWER_MAH=$baseline_actual_max_power"
+        echo "BASELINE_SOC_POWER_MAH=$baseline_soc_power"
     } >> "$POWER_LOG_FILE"
 
     log_info "=== Phase 1: 基线测试完成 ==="
-    echo "$baseline_computed_power" "$baseline_actual_min_power" "$baseline_actual_max_power"
+    echo "$baseline_computed_power" "$baseline_actual_min_power" "$baseline_actual_max_power" "$baseline_soc_power" "$baseline_duration_ms"
 }
 
 
@@ -355,13 +391,30 @@ generate_final_report() {
     local baseline_computed_power=$1
     local baseline_actual_min_power=$2
     local baseline_actual_max_power=$3
-    local actual_computed_power=$4
-    local actual_actual_min_power=$5
-    local actual_actual_max_power=$6
-    local runtime_ms=$7
-    local runtime_s=$8
+    local baseline_soc_power=$4
+    local baseline_duration_ms=$5
+    local actual_computed_power=$6
+    local actual_actual_min_power=$7
+    local actual_actual_max_power=$8
+    local actual_soc_power=$9
+    local runtime_ms=${10}
+    local runtime_s=${11}
+    local actual_start_time=${12}
+    local actual_end_time=${13}
 
     log_info "生成最终报告..."
+
+    # 直接使用格式化时间（无需转换）
+    local llm_start_time_readable="-1"
+    local llm_end_time_readable="-1"
+
+    if [ -n "$actual_start_time" ] && [ "$actual_start_time" != "-1" ]; then
+        llm_start_time_readable="$actual_start_time"
+    fi
+
+    if [ -n "$actual_end_time" ] && [ "$actual_end_time" != "-1" ]; then
+        llm_end_time_readable="$actual_end_time"
+    fi
 
     # 计算genie实际耗电量（三种方式）
     local genie_computed_power="-1.0"
@@ -371,13 +424,20 @@ generate_final_report() {
     local genie_actual_min_avg_power="-1.0"
     local genie_actual_max_avg_power="-1.0"
 
+    # 计算SoC净耗电量（来自Global CPU）
+    local genie_soc_power="-1.0"
+    local genie_soc_avg_power="-1.0"
+    local genie_soc_power_per_inference="-1.0"
+
     # 检查输入值是否有效（不是-1且是有效数字）
     local baseline_computed_valid=false
     local baseline_actual_min_valid=false
     local baseline_actual_max_valid=false
+    local baseline_soc_valid=false
     local actual_computed_valid=false
     local actual_actual_min_valid=false
     local actual_actual_max_valid=false
+    local actual_soc_valid=false
     local runtime_valid=false
 
     # 验证基线耗电量
@@ -390,6 +450,9 @@ generate_final_report() {
     if echo "$baseline_actual_max_power" | grep -qE '^-?[0-9]+\.?[0-9]*$' && [ "$baseline_actual_max_power" != "-1.0" ] && [ "$baseline_actual_max_power" != "-1" ]; then
         baseline_actual_max_valid=true
     fi
+    if echo "$baseline_soc_power" | grep -qE '^-?[0-9]+\.?[0-9]*$' && [ "$baseline_soc_power" != "-1.0" ] && [ "$baseline_soc_power" != "-1" ]; then
+        baseline_soc_valid=true
+    fi
 
     # 验证实际耗电量
     if echo "$actual_computed_power" | grep -qE '^-?[0-9]+\.?[0-9]*$' && [ "$actual_computed_power" != "-1.0" ] && [ "$actual_computed_power" != "-1" ]; then
@@ -400,6 +463,9 @@ generate_final_report() {
     fi
     if echo "$actual_actual_max_power" | grep -qE '^-?[0-9]+\.?[0-9]*$' && [ "$actual_actual_max_power" != "-1.0" ] && [ "$actual_actual_max_power" != "-1" ]; then
         actual_actual_max_valid=true
+    fi
+    if echo "$actual_soc_power" | grep -qE '^-?[0-9]+\.?[0-9]*$' && [ "$actual_soc_power" != "-1.0" ] && [ "$actual_soc_power" != "-1" ]; then
+        actual_soc_valid=true
     fi
 
     # 验证运行时间
@@ -427,6 +493,14 @@ generate_final_report() {
         log_info "计算actual_max净耗电量: $actual_actual_max_power - $baseline_actual_max_power = $genie_actual_max_power mAh"
     else
         log_info "无法计算actual_max净耗电量 - 基线有效: $baseline_actual_max_valid, 实际有效: $actual_actual_max_valid"
+    fi
+
+    # 计算SoC净耗电量（来自Global CPU）
+    if $baseline_soc_valid && $actual_soc_valid; then
+        genie_soc_power=$(echo "$actual_soc_power $baseline_soc_power" | awk '{printf "%.3f", $1 - $2}')
+        log_info "计算SoC净耗电量: $actual_soc_power - $baseline_soc_power = $genie_soc_power mAh (来自Global CPU)"
+    else
+        log_info "无法计算SoC净耗电量 - 基线有效: $baseline_soc_valid, 实际有效: $actual_soc_valid"
     fi
 
     # 计算基线功耗（基线耗电量 ÷ 基线时间(小时)）
@@ -508,6 +582,12 @@ generate_final_report() {
             genie_actual_max_avg_power=$(echo "$genie_actual_max_power $runtime_hours" | awk '{printf "%.3f", $1 / $2}')
             log_info "计算Genie actual_max平均功耗: $genie_actual_max_power mAh ÷ $runtime_hours h = $genie_actual_max_avg_power mA"
         fi
+
+        # 计算SoC净功耗
+        if echo "$genie_soc_power" | grep -qE '^-?[0-9]+\.?[0-9]*$' && [ "$genie_soc_power" != "-1.0" ]; then
+            genie_soc_avg_power=$(echo "$genie_soc_power $runtime_hours" | awk '{printf "%.3f", $1 / $2}')
+            log_info "计算SoC平均功耗: $genie_soc_power mAh ÷ $runtime_hours h = $genie_soc_avg_power mA (来自Global CPU)"
+        fi
     else
         log_info "无法计算Genie净功耗 - 运行时间有效: $runtime_valid"
     fi
@@ -558,6 +638,14 @@ generate_final_report() {
         else
             log_info "无法计算actual_max每次推理耗电量 - 净耗电量: $genie_actual_max_power, 进程数: $process_count"
         fi
+
+        # 计算SoC每次推理耗电量
+        if echo "$genie_soc_power" | grep -qE '^-?[0-9]+\.?[0-9]*$' && [ "$genie_soc_power" != "-1.0" ]; then
+            genie_soc_power_per_inference=$(echo "$genie_soc_power $process_count" | awk '{printf "%.6f", $1 / $2}')
+            log_info "计算SoC每次推理耗电量: $genie_soc_power / $process_count = $genie_soc_power_per_inference mAh (来自Global CPU)"
+        else
+            log_info "无法计算SoC每次推理耗电量 - 净耗电量: $genie_soc_power, 进程数: $process_count"
+        fi
     fi
 
     local avg_time_per_question="-1"
@@ -583,13 +671,14 @@ generate_final_report() {
             log_info "基线时长数据无效，设置为 -1"
         fi
 
-        # 提取基线耗电量（三种）
+        # 提取基线耗电量（四种）
         baseline_computed_power_from_log=$(grep "BASELINE_COMPUTED_POWER_MAH=" "$POWER_LOG_FILE" | tail -1 | cut -d'=' -f2 | tr -d ' \n\r' || echo "-1.0")
         baseline_actual_min_power_from_log=$(grep "BASELINE_ACTUAL_MIN_POWER_MAH=" "$POWER_LOG_FILE" | tail -1 | cut -d'=' -f2 | tr -d ' \n\r' || echo "-1.0")
         baseline_actual_max_power_from_log=$(grep "BASELINE_ACTUAL_MAX_POWER_MAH=" "$POWER_LOG_FILE" | tail -1 | cut -d'=' -f2 | tr -d ' \n\r' || echo "-1.0")
+        baseline_soc_power_from_log=$(grep "BASELINE_SOC_POWER_MAH=" "$POWER_LOG_FILE" | tail -1 | cut -d'=' -f2 | tr -d ' \n\r' || echo "-1.0")
 
         # 验证并转换为数字
-        for var in baseline_computed_power_from_log baseline_actual_min_power_from_log baseline_actual_max_power_from_log; do
+        for var in baseline_computed_power_from_log baseline_actual_min_power_from_log baseline_actual_max_power_from_log baseline_soc_power_from_log; do
             local value=$(eval echo \$$var)
             if ! echo "$value" | grep -qE '^[0-9]+\.?[0-9]*$'; then
                 eval "$var=\"-1.0\""
@@ -597,7 +686,7 @@ generate_final_report() {
             fi
         done
 
-        log_info "从日志提取 - 基线时长: ${baseline_duration_s}s, 基线computed耗电量: ${baseline_computed_power_from_log}mAh, 基线actual_min耗电量: ${baseline_actual_min_power_from_log}mAh, 基线actual_max耗电量: ${baseline_actual_max_power_from_log}mAh"
+        log_info "从日志提取 - 基线时长: ${baseline_duration_s}s, 基线computed耗电量: ${baseline_computed_power_from_log}mAh, 基线actual_min耗电量: ${baseline_actual_min_power_from_log}mAh, 基线actual_max耗电量: ${baseline_actual_max_power_from_log}mAh, 基线SoC耗电量: ${baseline_soc_power_from_log}mAh"
     else
         log_info "日志文件不存在，基线数据设置为 -1"
     fi
@@ -610,6 +699,7 @@ generate_final_report() {
     local safe_baseline_computed_power=${baseline_computed_power_from_log:-"-1.0"}
     local safe_baseline_actual_min_power=${baseline_actual_min_power_from_log:-"-1.0"}
     local safe_baseline_actual_max_power=${baseline_actual_max_power_from_log:-"-1.0"}
+    local safe_baseline_duration_ms=${baseline_duration_ms:-"-1"}
     local safe_actual_computed_power=${actual_computed_power:-"-1.0"}
     local safe_actual_actual_min_power=${actual_actual_min_power:-"-1.0"}
     local safe_actual_actual_max_power=${actual_actual_max_power:-"-1.0"}
@@ -626,6 +716,9 @@ generate_final_report() {
     local safe_actual_min_power_per_inference=${actual_min_power_per_inference:-"-1.0"}
     local safe_actual_max_power_per_inference=${actual_max_power_per_inference:-"-1.0"}
     local safe_avg_time_per_question=${avg_time_per_question:-"-1"}
+    local safe_genie_soc_power=${genie_soc_power:-"-1.0"}
+    local safe_genie_soc_avg_power=${genie_soc_avg_power:-"-1.0"}
+    local safe_genie_soc_power_per_inference=${genie_soc_power_per_inference:-"-1.0"}
 
     # 安全赋值新的功耗变量
     local safe_baseline_computed_avg_power=${baseline_computed_avg_power:-"-1.0"}
@@ -645,7 +738,7 @@ generate_final_report() {
     done
 
     # 验证和清理所有时间数值
-    for var in safe_runtime_ms safe_runtime_s safe_baseline_duration_s safe_avg_time_per_question; do
+    for var in safe_runtime_ms safe_runtime_s safe_baseline_duration_s safe_baseline_duration_ms safe_avg_time_per_question; do
         local value=$(eval echo \$$var)
         if ! echo "$value" | grep -qE '^-?[0-9]+$'; then
             eval "$var=\"-1\""
@@ -653,30 +746,15 @@ generate_final_report() {
         fi
     done
 
-    cat > "$FINAL_REPORT_FILE" << EOF
+    cat > "$POWER_MEM_REPORT_FILE" << EOF
 {
-  "test_summary": {
-    "test_start_time": "$timestamp",
-    "baseline_test": {
-      "computed_power_mah": $safe_baseline_computed_power,
-      "actual_power_min_mah": $safe_baseline_actual_min_power,
-      "actual_power_max_mah": $safe_baseline_actual_max_power,
-      "computed_average_power_ma": $safe_baseline_computed_avg_power,
-      "actual_min_average_power_ma": $safe_baseline_actual_min_avg_power,
-      "actual_max_average_power_ma": $safe_baseline_actual_max_avg_power,
-      "duration_s": $safe_baseline_duration_s
-    },
-    "actual_test": {
-      "computed_power_mah": $safe_actual_computed_power,
-      "actual_power_min_mah": $safe_actual_actual_min_power,
-      "actual_power_max_mah": $safe_actual_actual_max_power,
-      "computed_average_power_ma": $safe_actual_computed_avg_power,
-      "actual_min_average_power_ma": $safe_actual_actual_min_avg_power,
-      "actual_max_average_power_ma": $safe_actual_actual_max_avg_power,
-      "duration_ms": $safe_runtime_ms,
-      "duration_s": $safe_runtime_s
-    },
-    "genie_net_power": {
+  "llm_test_start_time": "$llm_start_time_readable",
+  "llm_test_end_time": "$llm_end_time_readable",
+  "genie_net_power": {
+    "soc_consumption_mah": $safe_genie_soc_power,
+    "soc_average_power_ma": $safe_genie_soc_avg_power,
+    "soc_power_per_inference_mah": $safe_genie_soc_power_per_inference,
+    "temp_unused_info": {
       "computed_consumption_mah": $safe_genie_computed_power,
       "actual_min_consumption_mah": $safe_genie_actual_min_power,
       "actual_max_consumption_mah": $safe_genie_actual_max_power,
@@ -694,27 +772,52 @@ generate_final_report() {
     "average_time_per_question_ms": $safe_avg_time_per_question
   },
   $(echo "$memory_stats" | sed '1d;$d'),
+  "baseline_test": {
+    "computed_power_mah": $safe_baseline_computed_power,
+    "actual_power_min_mah": $safe_baseline_actual_min_power,
+    "actual_power_max_mah": $safe_baseline_actual_max_power,
+    "computed_average_power_ma": $safe_baseline_computed_avg_power,
+    "actual_min_average_power_ma": $safe_baseline_actual_min_avg_power,
+    "actual_max_average_power_ma": $safe_baseline_actual_max_avg_power,
+    "duration_ms": $safe_baseline_duration_ms,
+    "duration_s": $safe_baseline_duration_s
+  },
+  "llm_test": {
+    "computed_power_mah": $safe_actual_computed_power,
+    "actual_power_min_mah": $safe_actual_actual_min_power,
+    "actual_power_max_mah": $safe_actual_actual_max_power,
+    "soc_power_mah": $safe_genie_soc_power,
+    "computed_average_power_ma": $safe_actual_computed_avg_power,
+    "actual_min_average_power_ma": $safe_actual_actual_min_avg_power,
+    "actual_max_average_power_ma": $safe_actual_actual_max_avg_power,
+    "duration_ms": $safe_runtime_ms,
+    "duration_s": $safe_runtime_s
+  },
   "test_environment": {
     "device_info": "$(getprop ro.product.model 2>/dev/null || echo 'Unknown')",
-    "android_version": "$(getprop ro.build.version.release 2>/dev/null || echo 'Unknown')"
+    "android_version": "$(getprop ro.build.version.release 2>/dev/null || echo 'Unknown')",
+    "real_ram_size": "$(cat /proc/meminfo | grep MemTotal | awk '{printf "%.1f", $2/1048576}')",
+    "soc_chip": "$(getprop ro.board.platform 2>/dev/null || getprop ro.product.board 2>/dev/null || getprop ro.hardware 2>/dev/null || echo 'Unknown')"
   },
   "generated_at": "$timestamp"
 }
 EOF
 
-    log_info "最终报告已生成: $FINAL_REPORT_FILE"
+    log_info "最终报告已生成: $POWER_MEM_REPORT_FILE"
 
     # 输出关键结果
     echo "=== 测试结果摘要 ==="
-    echo "基线耗电量 - Computed: ${baseline_computed_power} mAh, Actual_min: ${baseline_actual_min_power} mAh, Actual_max: ${baseline_actual_max_power} mAh"
+    echo "基线耗电量 - Computed: ${baseline_computed_power} mAh, Actual_min: ${baseline_actual_min_power} mAh, Actual_max: ${baseline_actual_max_power} mAh, SoC: ${baseline_soc_power} mAh"
     echo "基线功耗 - Computed: ${baseline_computed_avg_power} mA, Actual_min: ${baseline_actual_min_avg_power} mA, Actual_max: ${baseline_actual_max_avg_power} mA"
-    echo "实际耗电量 - Computed: ${actual_computed_power} mAh, Actual_min: ${actual_actual_min_power} mAh, Actual_max: ${actual_actual_max_power} mAh"
-    echo "实际功耗 - Computed: ${actual_computed_avg_power} mA, Actual_min: ${actual_actual_min_avg_power} mA, Actual_max: ${actual_actual_max_avg_power} mA"
+    echo "LLM测试耗电量 - Computed: ${actual_computed_power} mAh, Actual_min: ${actual_actual_min_power} mAh, Actual_max: ${actual_actual_max_power} mAh, SoC: ${actual_soc_power} mAh"
+    echo "LLM测试功耗 - Computed: ${actual_computed_avg_power} mA, Actual_min: ${actual_actual_min_avg_power} mA, Actual_max: ${actual_actual_max_avg_power} mA"
     echo "Genie净耗电量 - Computed: ${genie_computed_power} mAh, Actual_min: ${genie_actual_min_power} mAh, Actual_max: ${genie_actual_max_power} mAh"
     echo "Genie净功耗 - Computed: ${genie_computed_avg_power} mA, Actual_min: ${genie_actual_min_avg_power} mA, Actual_max: ${genie_actual_max_avg_power} mA"
+    echo "SoC净耗电量: ${genie_soc_power} mAh (来自Global CPU)"
+    echo "SoC净功耗: ${genie_soc_avg_power} mA (来自Global CPU)"
     echo "推理进程数: $process_count"
     echo "完成题目数: $completed_questions"
-    echo "详细报告: $FINAL_REPORT_FILE"
+    echo "详细报告: $POWER_MEM_REPORT_FILE"
 }
 
 # 主函数
@@ -724,18 +827,23 @@ main() {
     # 设置环境
     setup_test_environment
 
-    # Phase 1: 实际测试
-    local actual_test_result=$(run_actual_test)
-    local actual_computed_power=$(echo "$actual_test_result" | awk '{print $1}')
-    local actual_actual_min_power=$(echo "$actual_test_result" | awk '{print $2}')
-    local actual_actual_max_power=$(echo "$actual_test_result" | awk '{print $3}')
-    local runtime_ms=$(echo "$actual_test_result" | awk '{print $4}')
-    local runtime_s=$(echo "$actual_test_result" | awk '{print $5}')
+    # Phase 1: LLM测试
+    local llm_test_result=$(run_actual_test)
+    local actual_computed_power=$(echo "$llm_test_result" | awk '{print $1}')
+    local actual_actual_min_power=$(echo "$llm_test_result" | awk '{print $2}')
+    local actual_actual_max_power=$(echo "$llm_test_result" | awk '{print $3}')
+    local actual_soc_power=$(echo "$llm_test_result" | awk '{print $4}')
+    local runtime_ms=$(echo "$llm_test_result" | awk '{print $5}')
+    local runtime_s=$(echo "$llm_test_result" | awk '{print $6}')
+    local actual_start_time=$(echo "$llm_test_result" | awk '{print $7}')
+    local actual_end_time=$(echo "$llm_test_result" | awk '{print $8}')
 
     # Phase 2: 基线测试
     local baseline_computed_power="-1.0"
     local baseline_actual_min_power="-1.0"
     local baseline_actual_max_power="-1.0"
+    local baseline_soc_power="-1.0"
+    local baseline_duration_ms="-1"
 
     if [ "$runtime_s" -gt 0 ]; then
         log_info "开始基线测试，时长: $runtime_s 秒"
@@ -744,12 +852,14 @@ main() {
         baseline_computed_power=$(echo "$baseline_test_result" | awk '{print $1}')
         baseline_actual_min_power=$(echo "$baseline_test_result" | awk '{print $2}')
         baseline_actual_max_power=$(echo "$baseline_test_result" | awk '{print $3}')
+        baseline_soc_power=$(echo "$baseline_test_result" | awk '{print $4}')
+        baseline_duration_ms=$(echo "$baseline_test_result" | awk '{print $5}')
     else
-        log_error "实际测试时长无效(runtime_s=$runtime_s)，无法进行基线测试"
+        log_error "LLM测试时长无效(runtime_s=$runtime_s)，无法进行基线测试"
     fi
 
     # 生成最终报告
-    generate_final_report "$baseline_computed_power" "$baseline_actual_min_power" "$baseline_actual_max_power" "$actual_computed_power" "$actual_actual_min_power" "$actual_actual_max_power" "$runtime_ms" "$runtime_s"
+    generate_final_report "$baseline_computed_power" "$baseline_actual_min_power" "$baseline_actual_max_power" "$baseline_soc_power" "$baseline_duration_ms" "$actual_computed_power" "$actual_actual_min_power" "$actual_actual_max_power" "$actual_soc_power" "$runtime_ms" "$runtime_s" "$actual_start_time" "$actual_end_time"
 
     # 恢复环境
     restore_environment

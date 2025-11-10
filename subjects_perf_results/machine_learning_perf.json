@@ -1,0 +1,33 @@
+{
+  "subject": "machine_learning",
+  "total_questions": 1,
+  "correct_count": 1,
+  "wrong_count": 0,
+  "accuracy_rate": 1.0,
+  "answer_not_found": {
+    "count": 0,
+    "question_indices": []
+  },
+  "performance_metrics": {
+    "avg_prompt_processing_rate_toks_per_sec": 1314.06,
+    "avg_token_generation_rate_toks_per_sec": 33.166,
+    "total_processed_answers": 1
+  },
+  "detailed_metrics": {
+    "init_time_us": [
+      1063598.0
+    ],
+    "prompt_processing_time_us": [
+      153875.0
+    ],
+    "prompt_processing_rate_toks_per_sec": [
+      1314.060425
+    ],
+    "token_generation_time_us": [
+      150758.0
+    ],
+    "token_generation_rate_toks_per_sec": [
+      33.166397
+    ]
+  }
+}

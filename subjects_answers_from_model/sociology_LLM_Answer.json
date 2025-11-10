@@ -1,0 +1,81 @@
+{
+  "subject": "sociology",
+  "answers": [
+    {
+      "question_index": 0,
+      "global_index": 0,
+      "start_timestamp": "2025-11-09 22:14:31",
+      "final_answer": "C",
+      "model_output": "
+答案：C
+
+",
+      "performance_metrics": {
+        "init_time_us": 1081103,
+        "prompt_processing_time_us": 152973,
+        "prompt_processing_rate_toks_per_sec": 1190.476196,
+        "token_generation_time_us": 112658,
+        "token_generation_rate_toks_per_sec": 35.506321
+      },
+      "end_timestamp": "2025-11-09 22:14:33"
+    }
+,
+    {
+      "question_index": 1,
+      "global_index": 1,
+      "start_timestamp": "2025-11-09 22:14:33",
+      "final_answer": "B",
+      "model_output": "
+答案：B
+
+",
+      "performance_metrics": {
+        "init_time_us": 1101397,
+        "prompt_processing_time_us": 152351,
+        "prompt_processing_rate_toks_per_sec": 1037.344360,
+        "token_generation_time_us": 112600,
+        "token_generation_rate_toks_per_sec": 35.523979
+      },
+      "end_timestamp": "2025-11-09 22:14:34"
+    }
+,
+    {
+      "question_index": 2,
+      "global_index": 2,
+      "start_timestamp": "2025-11-09 22:14:34",
+      "final_answer": "C",
+      "model_output": "
+答案：C
+
+",
+      "performance_metrics": {
+        "init_time_us": 1069357,
+        "prompt_processing_time_us": 150135,
+        "prompt_processing_rate_toks_per_sec": 872.600342,
+        "token_generation_time_us": 113166,
+        "token_generation_rate_toks_per_sec": 35.346931
+      },
+      "end_timestamp": "2025-11-09 22:14:36"
+    }
+,
+    {
+      "question_index": 3,
+      "global_index": 3,
+      "start_timestamp": "2025-11-09 22:14:36",
+      "final_answer": "D",
+      "model_output": "
+答案：D
+
+",
+      "performance_metrics": {
+        "init_time_us": 1074339,
+        "prompt_processing_time_us": 152356,
+        "prompt_processing_rate_toks_per_sec": 1215.066772,
+        "token_generation_time_us": 112912,
+        "token_generation_rate_toks_per_sec": 35.425819
+      },
+      "end_timestamp": "2025-11-09 22:14:38"
+    }
+
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "subject": "public_relations",
+  "answers": [
+    {
+      "question_index": 0,
+      "global_index": 0,
+      "start_timestamp": "2025-11-09 22:14:28",
+      "final_answer": "A",
+      "model_output": "
+答案：A
+
+",
+      "performance_metrics": {
+        "init_time_us": 1076937,
+        "prompt_processing_time_us": 152085,
+        "prompt_processing_rate_toks_per_sec": 927.643799,
+        "token_generation_time_us": 113782,
+        "token_generation_rate_toks_per_sec": 35.155563
+      },
+      "end_timestamp": "2025-11-09 22:14:29"
+    }
+,
+    {
+      "question_index": 1,
+      "global_index": 1,
+      "start_timestamp": "2025-11-09 22:14:29",
+      "final_answer": "D",
+      "model_output": "
+答案：D
+
+",
+      "performance_metrics": {
+        "init_time_us": 1063686,
+        "prompt_processing_time_us": 156975,
+        "prompt_processing_rate_toks_per_sec": 904.977356,
+        "token_generation_time_us": 113320,
+        "token_generation_rate_toks_per_sec": 35.298271
+      },
+      "end_timestamp": "2025-11-09 22:14:31"
+    }
+
+  ]
+}

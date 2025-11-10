@@ -1,0 +1,53 @@
+{
+  "subject": "professional_medicine",
+  "total_questions": 5,
+  "correct_count": 2,
+  "wrong_count": 3,
+  "accuracy_rate": 0.4,
+  "answer_not_found": {
+    "count": 0,
+    "question_indices": []
+  },
+  "performance_metrics": {
+    "avg_prompt_processing_rate_toks_per_sec": 1318.631,
+    "avg_token_generation_rate_toks_per_sec": 35.028,
+    "total_processed_answers": 5
+  },
+  "detailed_metrics": {
+    "init_time_us": [
+      1071676.0,
+      1067228.0,
+      1054683.0,
+      1109245.0,
+      1068819.0
+    ],
+    "prompt_processing_time_us": [
+      226190.0,
+      226704.0,
+      150147.0,
+      304331.0,
+      154318.0
+    ],
+    "prompt_processing_rate_toks_per_sec": [
+      1251.564453,
+      1283.697021,
+      1338.68811,
+      1324.503296,
+      1394.700195
+    ],
+    "token_generation_time_us": [
+      113562.0,
+      115107.0,
+      115406.0,
+      113403.0,
+      113545.0
+    ],
+    "token_generation_rate_toks_per_sec": [
+      35.223671,
+      34.751183,
+      34.660843,
+      35.273369,
+      35.228634
+    ]
+  }
+}
