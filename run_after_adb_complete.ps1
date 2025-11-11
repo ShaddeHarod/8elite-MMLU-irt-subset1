@@ -19,7 +19,7 @@ foreach ($remotePath in $fileList) {
     # 拉取到目标文件夹（路径中含空格时用双引号）
     adb pull $remotePath ".\subjects_answers_from_model\$fileName"
 }
-adb pull /data/local/tmp/genie-qwen2.5-3b/result/POWER_MEM_REPORT.json .\pulled_report_logs
+adb pull /data/local/tmp/genie-qwen2.5-3b/result/POWER_MEM_TEMPERATURE_REPORT.json .\pulled_report_logs
 adb pull /data/local/tmp/genie-qwen2.5-3b/memory_logs/system_memory.log .\pulled_report_logs
 
 python scripts/analyze_llm_results.py

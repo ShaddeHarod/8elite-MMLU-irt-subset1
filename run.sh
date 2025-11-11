@@ -6,12 +6,16 @@
 
 mkdir -p result
 
-# 配置变量
+# filepath info
 TEST_SCRIPT="read_all_subjects_prompts.sh"
 OUTPUT_FILE="output.txt"
 POWER_LOG_FILE="power_consumption.log"
-POWER_MEM_REPORT_FILE="result/POWER_MEM_REPORT.json"
-
+POWER_MEM_REPORT_FILE="result/POWER_MEM_TEMPERATURE_REPORT.json"
+TEMPERATURE_TEMP_FILE="temperature_temp.log"
+LLM_START_TEMPERATURE_FILE="result/temperature_llm_start.json"
+LLM_END_TEMPERATURE_FILE="result/temperature_llm_end.json"
+BASELINE_START_TEMPERATURE_FILE="result/temperature_baseline_start.json"
+BASELINE_END_TEMPERATURE_FILE="result/temperature_baseline_end.json"
 # 日志函数
 log_info() {
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
@@ -63,6 +67,112 @@ validate_power_value() {
     else
         return 1
     fi
+}
+
+# 记录各组件温度
+record_component_temperature() {
+    local timestamp_label=$1
+    local temp_json=""
+    local temp_sum=0
+    local temp_count=0
+    local avg_temp=0
+
+    # Battery
+    local battery_temp=$(cat /sys/class/thermal/thermal_zone81/temp 2>/dev/null || echo "0")
+    battery_temp=$((battery_temp / 1000))
+    temp_json="${temp_json}\n    \"battery\": { \"${timestamp_label}_temperature\": ${battery_temp} },"
+
+    # CPU-0 (zones: 1,3,5,7,9,11,13,15,17,19,20,21)
+    temp_sum=0; temp_count=0
+    for zone in 1 3 5 7 9 11 13 15 17 19 20 21; do
+        local temp=$(cat /sys/class/thermal/thermal_zone${zone}/temp 2>/dev/null || echo "0")
+        if [ "$temp" != "0" ]; then
+            temp_sum=$((temp_sum + temp / 1000))
+            temp_count=$((temp_count + 1))
+        fi
+    done
+    avg_temp=$((temp_count > 0 ? temp_sum / temp_count : 0))
+    temp_json="${temp_json}\n    \"cpu-0\": { \"${timestamp_label}_temperature\": ${avg_temp} },"
+
+    # CPU-1 (zones: 25,26,27,28)
+    temp_sum=0; temp_count=0
+    for zone in 25 26 27 28; do
+        local temp=$(cat /sys/class/thermal/thermal_zone${zone}/temp 2>/dev/null || echo "0")
+        if [ "$temp" != "0" ]; then
+            temp_sum=$((temp_sum + temp / 1000))
+            temp_count=$((temp_count + 1))
+        fi
+    done
+    avg_temp=$((temp_count > 0 ? temp_sum / temp_count : 0))
+    temp_json="${temp_json}\n    \"cpu-1\": { \"${timestamp_label}_temperature\": ${avg_temp} },"
+
+    # CPUSS (zones: 22,23,29,30)
+    temp_sum=0; temp_count=0
+    for zone in 22 23 29 30; do
+        local temp=$(cat /sys/class/thermal/thermal_zone${zone}/temp 2>/dev/null || echo "0")
+        if [ "$temp" != "0" ]; then
+            temp_sum=$((temp_sum + temp / 1000))
+            temp_count=$((temp_count + 1))
+        fi
+    done
+    avg_temp=$((temp_count > 0 ? temp_sum / temp_count : 0))
+    temp_json="${temp_json}\n    \"cpuss\": { \"${timestamp_label}_temperature\": ${avg_temp} },"
+
+    # DDR (zone: 55)
+    local ddr_temp=$(cat /sys/class/thermal/thermal_zone55/temp 2>/dev/null || echo "0")
+    ddr_temp=$((ddr_temp / 1000))
+    temp_json="${temp_json}\n    \"ddr\": { \"${timestamp_label}_temperature\": ${ddr_temp} },"
+
+    # GPUSS (zones: 32,33,34,35,36,37,38,39)
+    temp_sum=0; temp_count=0
+    for zone in 32 33 34 35 36 37 38 39; do
+        local temp=$(cat /sys/class/thermal/thermal_zone${zone}/temp 2>/dev/null || echo "0")
+        if [ "$temp" != "0" ]; then
+            temp_sum=$((temp_sum + temp / 1000))
+            temp_count=$((temp_count + 1))
+        fi
+    done
+    avg_temp=$((temp_count > 0 ? temp_sum / temp_count : 0))
+    temp_json="${temp_json}\n    \"gpuss\": { \"${timestamp_label}_temperature\": ${avg_temp} },"
+
+    # NSPHMX (zones: 51,52,53,54)
+    temp_sum=0; temp_count=0
+    for zone in 51 52 53 54; do
+        local temp=$(cat /sys/class/thermal/thermal_zone${zone}/temp 2>/dev/null || echo "0")
+        if [ "$temp" != "0" ]; then
+            temp_sum=$((temp_sum + temp / 1000))
+            temp_count=$((temp_count + 1))
+        fi
+    done
+    avg_temp=$((temp_count > 0 ? temp_sum / temp_count : 0))
+    temp_json="${temp_json}\n    \"nsphmx\": { \"${timestamp_label}_temperature\": ${avg_temp} },"
+
+    # NSPHVX (zones: 48,49,50)
+    temp_sum=0; temp_count=0
+    for zone in 48 49 50; do
+        local temp=$(cat /sys/class/thermal/thermal_zone${zone}/temp 2>/dev/null || echo "0")
+        if [ "$temp" != "0" ]; then
+            temp_sum=$((temp_sum + temp / 1000))
+            temp_count=$((temp_count + 1))
+        fi
+    done
+    avg_temp=$((temp_count > 0 ? temp_sum / temp_count : 0))
+    temp_json="${temp_json}\n    \"nsphvx\": { \"${timestamp_label}_temperature\": ${avg_temp} },"
+
+    # Shell components
+    local shell_back_temp=$(cat /sys/class/thermal/thermal_zone58/temp 2>/dev/null || echo "0")
+    shell_back_temp=$((shell_back_temp / 1000))
+    temp_json="${temp_json}\n    \"shell_back\": { \"${timestamp_label}_temperature\": ${shell_back_temp} },"
+
+    local shell_frame_temp=$(cat /sys/class/thermal/thermal_zone57/temp 2>/dev/null || echo "0")
+    shell_frame_temp=$((shell_frame_temp / 1000))
+    temp_json="${temp_json}\n    \"shell_frame\": { \"${timestamp_label}_temperature\": ${shell_frame_temp} },"
+
+    local shell_front_temp=$(cat /sys/class/thermal/thermal_zone56/temp 2>/dev/null || echo "0")
+    shell_front_temp=$((shell_front_temp / 1000))
+    temp_json="${temp_json}\n    \"shell_front\": { \"${timestamp_label}_temperature\": ${shell_front_temp} }"
+
+    echo -e "{${temp_json}\n}" > "$TEMPERATURE_TEMP_FILE" 2>&1
 }
 
 # 获取batterystats耗电量数据
@@ -283,9 +393,15 @@ EOF
 run_actual_test() {
     log_info "=== Phase 1: LLM测试开始 ==="
 
+    # 记录测试开始温度
+    # 为了简化温度JSON处理，将温度数据保存到临时文件
+
+    record_component_temperature "start"
+    cat "$TEMPERATURE_TEMP_FILE" > "$LLM_START_TEMPERATURE_FILE"
+
     # 重置电池统计
     dumpsys batterystats --reset >/dev/null 2>&1
-    local actual_start_time=$(date '+%Y-%m-%d %H:%M:%S')
+    local actual_start_time=$(date '+%Y-%m-%dT%H:%M:%S')
 
     # 运行实际的推理脚本
     log_info "开始运行推理测试..."
@@ -297,7 +413,13 @@ run_actual_test() {
         return 1
     fi
 
-    local actual_end_time=$(date '+%Y-%m-%d %H:%M:%S')
+    local actual_end_time=$(date '+%Y-%m-%dT%H:%M:%S')
+
+    # 记录测试结束温度
+    record_component_temperature "end"
+    cat "$TEMPERATURE_TEMP_FILE" > "$LLM_END_TEMPERATURE_FILE"
+
+
     local actual_power_result
     actual_power_result=$(get_power_consumption "$actual_start_time" "$actual_end_time" "LLM测试")
 
@@ -351,6 +473,10 @@ run_baseline_test() {
     log_info "=== Phase 2: 基线测试开始 ==="
     log_info "测试时长: ${test_duration} 秒"
 
+    # 记录基线测试开始温度
+    record_component_temperature "start"
+    cat "$TEMPERATURE_TEMP_FILE" > "$BASELINE_START_TEMPERATURE_FILE"
+
     # 重置电池统计
     dumpsys batterystats --reset >/dev/null 2>&1
     local baseline_start_time=$(date +%s%3N)
@@ -361,6 +487,11 @@ run_baseline_test() {
 
     local baseline_end_time=$(date +%s%3N)
     local baseline_duration_ms=$((baseline_end_time - baseline_start_time))
+
+    # 记录基线测试结束温度
+    record_component_temperature "end"
+    cat "$TEMPERATURE_TEMP_FILE" > "$BASELINE_END_TEMPERATURE_FILE"
+
     local baseline_power_result
     baseline_power_result=$(get_power_consumption "$baseline_start_time" "$baseline_end_time" "基线测试")
 
@@ -401,6 +532,10 @@ generate_final_report() {
     local runtime_s=${11}
     local actual_start_time=${12}
     local actual_end_time=${13}
+    local actual_start_temp_file="$LLM_START_TEMPERATURE_FILE"
+    local actual_end_temp_file="$LLM_END_TEMPERATURE_FILE"
+    local baseline_start_temp_file="$BASELINE_START_TEMPERATURE_FILE"
+    local baseline_end_temp_file="$BASELINE_END_TEMPERATURE_FILE"
 
     log_info "生成最终报告..."
 
@@ -746,6 +881,141 @@ generate_final_report() {
         fi
     done
 
+    # 读取温度数据
+    local baseline_component_temperature="{}"
+    local llm_component_temperature="{}"
+
+    if [ -f "$baseline_start_temp_file" ] && [ -f "$baseline_end_temp_file" ]; then
+        # 简化温度JSON读取，避免复杂的管道操作
+        local battery_start_temp=$(cat "$baseline_start_temp_file" 2>/dev/null | grep -o '"battery": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local battery_end_temp=$(cat "$baseline_end_temp_file" 2>/dev/null | grep -o '"battery": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local cpu0_start_temp=$(cat "$baseline_start_temp_file" 2>/dev/null | grep -o '"cpu-0": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local cpu0_end_temp=$(cat "$baseline_end_temp_file" 2>/dev/null | grep -o '"cpu-0": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local cpu1_start_temp=$(cat "$baseline_start_temp_file" 2>/dev/null | grep -o '"cpu-1": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local cpu1_end_temp=$(cat "$baseline_end_temp_file" 2>/dev/null | grep -o '"cpu-1": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local cpuss_start_temp=$(cat "$baseline_start_temp_file" 2>/dev/null | grep -o '"cpuss": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local cpuss_end_temp=$(cat "$baseline_end_temp_file" 2>/dev/null | grep -o '"cpuss": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local ddr_start_temp=$(cat "$baseline_start_temp_file" 2>/dev/null | grep -o '"ddr": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local ddr_end_temp=$(cat "$baseline_end_temp_file" 2>/dev/null | grep -o '"ddr": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local gpuss_start_temp=$(cat "$baseline_start_temp_file" 2>/dev/null | grep -o '"gpuss": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local gpuss_end_temp=$(cat "$baseline_end_temp_file" 2>/dev/null | grep -o '"gpuss": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local nsphmx_start_temp=$(cat "$baseline_start_temp_file" 2>/dev/null | grep -o '"nsphmx": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local nsphmx_end_temp=$(cat "$baseline_end_temp_file" 2>/dev/null | grep -o '"nsphmx": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local nsphvx_start_temp=$(cat "$baseline_start_temp_file" 2>/dev/null | grep -o '"nsphvx": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local nsphvx_end_temp=$(cat "$baseline_end_temp_file" 2>/dev/null | grep -o '"nsphvx": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local shell_back_start_temp=$(cat "$baseline_start_temp_file" 2>/dev/null | grep -o '"shell_back": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local shell_back_end_temp=$(cat "$baseline_end_temp_file" 2>/dev/null | grep -o '"shell_back": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local shell_frame_start_temp=$(cat "$baseline_start_temp_file" 2>/dev/null | grep -o '"shell_frame": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local shell_frame_end_temp=$(cat "$baseline_end_temp_file" 2>/dev/null | grep -o '"shell_frame": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local shell_front_start_temp=$(cat "$baseline_start_temp_file" 2>/dev/null | grep -o '"shell_front": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local shell_front_end_temp=$(cat "$baseline_end_temp_file" 2>/dev/null | grep -o '"shell_front": {[^}]*}' | grep -o '[0-9]*' | head -1)
+
+        # 设置默认值
+        [ -z "$battery_start_temp" ] && battery_start_temp="0"
+        [ -z "$battery_end_temp" ] && battery_end_temp="0"
+        [ -z "$cpu0_start_temp" ] && cpu0_start_temp="0"
+        [ -z "$cpu0_end_temp" ] && cpu0_end_temp="0"
+        [ -z "$cpu1_start_temp" ] && cpu1_start_temp="0"
+        [ -z "$cpu1_end_temp" ] && cpu1_end_temp="0"
+        [ -z "$cpuss_start_temp" ] && cpuss_start_temp="0"
+        [ -z "$cpuss_end_temp" ] && cpuss_end_temp="0"
+        [ -z "$ddr_start_temp" ] && ddr_start_temp="0"
+        [ -z "$ddr_end_temp" ] && ddr_end_temp="0"
+        [ -z "$gpuss_start_temp" ] && gpuss_start_temp="0"
+        [ -z "$gpuss_end_temp" ] && gpuss_end_temp="0"
+        [ -z "$nsphmx_start_temp" ] && nsphmx_start_temp="0"
+        [ -z "$nsphmx_end_temp" ] && nsphmx_end_temp="0"
+        [ -z "$nsphvx_start_temp" ] && nsphvx_start_temp="0"
+        [ -z "$nsphvx_end_temp" ] && nsphvx_end_temp="0"
+        [ -z "$shell_back_start_temp" ] && shell_back_start_temp="0"
+        [ -z "$shell_back_end_temp" ] && shell_back_end_temp="0"
+        [ -z "$shell_frame_start_temp" ] && shell_frame_start_temp="0"
+        [ -z "$shell_frame_end_temp" ] && shell_frame_end_temp="0"
+        [ -z "$shell_front_start_temp" ] && shell_front_start_temp="0"
+        [ -z "$shell_front_end_temp" ] && shell_front_end_temp="0"
+
+        baseline_component_temperature="{
+  \"battery\": { \"start_temperature\": ${battery_start_temp}, \"end_temperature\": ${battery_end_temp} },
+  \"cpu-0\": { \"start_temperature\": ${cpu0_start_temp}, \"end_temperature\": ${cpu0_end_temp} },
+  \"cpu-1\": { \"start_temperature\": ${cpu1_start_temp}, \"end_temperature\": ${cpu1_end_temp} },
+  \"cpuss\": { \"start_temperature\": ${cpuss_start_temp}, \"end_temperature\": ${cpuss_end_temp} },
+  \"ddr\": { \"start_temperature\": ${ddr_start_temp}, \"end_temperature\": ${ddr_end_temp} },
+  \"gpuss\": { \"start_temperature\": ${gpuss_start_temp}, \"end_temperature\": ${gpuss_end_temp} },
+  \"nsphmx\": { \"start_temperature\": ${nsphmx_start_temp}, \"end_temperature\": ${nsphmx_end_temp} },
+  \"nsphvx\": { \"start_temperature\": ${nsphvx_start_temp}, \"end_temperature\": ${nsphvx_end_temp} },
+  \"shell_back\": { \"start_temperature\": ${shell_back_start_temp}, \"end_temperature\": ${shell_back_end_temp} },
+  \"shell_frame\": { \"start_temperature\": ${shell_frame_start_temp}, \"end_temperature\": ${shell_frame_end_temp} },
+  \"shell_front\": { \"start_temperature\": ${shell_front_start_temp}, \"end_temperature\": ${shell_front_end_temp} }
+}"
+    fi
+
+    if [ -f "$actual_start_temp_file" ] && [ -f "$actual_end_temp_file" ]; then
+        # 简化温度JSON读取，避免复杂的管道操作
+        local battery_start_temp=$(cat "$actual_start_temp_file" 2>/dev/null | grep -o '"battery": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local battery_end_temp=$(cat "$actual_end_temp_file" 2>/dev/null | grep -o '"battery": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local cpu0_start_temp=$(cat "$actual_start_temp_file" 2>/dev/null | grep -o '"cpu-0": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local cpu0_end_temp=$(cat "$actual_end_temp_file" 2>/dev/null | grep -o '"cpu-0": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local cpu1_start_temp=$(cat "$actual_start_temp_file" 2>/dev/null | grep -o '"cpu-1": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local cpu1_end_temp=$(cat "$actual_end_temp_file" 2>/dev/null | grep -o '"cpu-1": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local cpuss_start_temp=$(cat "$actual_start_temp_file" 2>/dev/null | grep -o '"cpuss": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local cpuss_end_temp=$(cat "$actual_end_temp_file" 2>/dev/null | grep -o '"cpuss": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local ddr_start_temp=$(cat "$actual_start_temp_file" 2>/dev/null | grep -o '"ddr": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local ddr_end_temp=$(cat "$actual_end_temp_file" 2>/dev/null | grep -o '"ddr": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local gpuss_start_temp=$(cat "$actual_start_temp_file" 2>/dev/null | grep -o '"gpuss": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local gpuss_end_temp=$(cat "$actual_end_temp_file" 2>/dev/null | grep -o '"gpuss": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local nsphmx_start_temp=$(cat "$actual_start_temp_file" 2>/dev/null | grep -o '"nsphmx": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local nsphmx_end_temp=$(cat "$actual_end_temp_file" 2>/dev/null | grep -o '"nsphmx": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local nsphvx_start_temp=$(cat "$actual_start_temp_file" 2>/dev/null | grep -o '"nsphvx": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local nsphvx_end_temp=$(cat "$actual_end_temp_file" 2>/dev/null | grep -o '"nsphvx": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local shell_back_start_temp=$(cat "$actual_start_temp_file" 2>/dev/null | grep -o '"shell_back": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local shell_back_end_temp=$(cat "$actual_end_temp_file" 2>/dev/null | grep -o '"shell_back": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local shell_frame_start_temp=$(cat "$actual_start_temp_file" 2>/dev/null | grep -o '"shell_frame": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local shell_frame_end_temp=$(cat "$actual_end_temp_file" 2>/dev/null | grep -o '"shell_frame": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local shell_front_start_temp=$(cat "$actual_start_temp_file" 2>/dev/null | grep -o '"shell_front": {[^}]*}' | grep -o '[0-9]*' | head -1)
+        local shell_front_end_temp=$(cat "$actual_end_temp_file" 2>/dev/null | grep -o '"shell_front": {[^}]*}' | grep -o '[0-9]*' | head -1)
+
+        # 设置默认值
+        [ -z "$battery_start_temp" ] && battery_start_temp="0"
+        [ -z "$battery_end_temp" ] && battery_end_temp="0"
+        [ -z "$cpu0_start_temp" ] && cpu0_start_temp="0"
+        [ -z "$cpu0_end_temp" ] && cpu0_end_temp="0"
+        [ -z "$cpu1_start_temp" ] && cpu1_start_temp="0"
+        [ -z "$cpu1_end_temp" ] && cpu1_end_temp="0"
+        [ -z "$cpuss_start_temp" ] && cpuss_start_temp="0"
+        [ -z "$cpuss_end_temp" ] && cpuss_end_temp="0"
+        [ -z "$ddr_start_temp" ] && ddr_start_temp="0"
+        [ -z "$ddr_end_temp" ] && ddr_end_temp="0"
+        [ -z "$gpuss_start_temp" ] && gpuss_start_temp="0"
+        [ -z "$gpuss_end_temp" ] && gpuss_end_temp="0"
+        [ -z "$nsphmx_start_temp" ] && nsphmx_start_temp="0"
+        [ -z "$nsphmx_end_temp" ] && nsphmx_end_temp="0"
+        [ -z "$nsphvx_start_temp" ] && nsphvx_start_temp="0"
+        [ -z "$nsphvx_end_temp" ] && nsphvx_end_temp="0"
+        [ -z "$shell_back_start_temp" ] && shell_back_start_temp="0"
+        [ -z "$shell_back_end_temp" ] && shell_back_end_temp="0"
+        [ -z "$shell_frame_start_temp" ] && shell_frame_start_temp="0"
+        [ -z "$shell_frame_end_temp" ] && shell_frame_end_temp="0"
+        [ -z "$shell_front_start_temp" ] && shell_front_start_temp="0"
+        [ -z "$shell_front_end_temp" ] && shell_front_end_temp="0"
+
+        llm_component_temperature="{
+  \"battery\": { \"start_temperature\": ${battery_start_temp}, \"end_temperature\": ${battery_end_temp} },
+  \"cpu-0\": { \"start_temperature\": ${cpu0_start_temp}, \"end_temperature\": ${cpu0_end_temp} },
+  \"cpu-1\": { \"start_temperature\": ${cpu1_start_temp}, \"end_temperature\": ${cpu1_end_temp} },
+  \"cpuss\": { \"start_temperature\": ${cpuss_start_temp}, \"end_temperature\": ${cpuss_end_temp} },
+  \"ddr\": { \"start_temperature\": ${ddr_start_temp}, \"end_temperature\": ${ddr_end_temp} },
+  \"gpuss\": { \"start_temperature\": ${gpuss_start_temp}, \"end_temperature\": ${gpuss_end_temp} },
+  \"nsphmx\": { \"start_temperature\": ${nsphmx_start_temp}, \"end_temperature\": ${nsphmx_end_temp} },
+  \"nsphvx\": { \"start_temperature\": ${nsphvx_start_temp}, \"end_temperature\": ${nsphvx_end_temp} },
+  \"shell_back\": { \"start_temperature\": ${shell_back_start_temp}, \"end_temperature\": ${shell_back_end_temp} },
+  \"shell_frame\": { \"start_temperature\": ${shell_frame_start_temp}, \"end_temperature\": ${shell_frame_end_temp} },
+  \"shell_front\": { \"start_temperature\": ${shell_front_start_temp}, \"end_temperature\": ${shell_front_end_temp} }
+}"
+    fi
+
+    # 清理临时温度文件
+    # rm -f "$actual_start_temp_file" "$actual_end_temp_file" "$baseline_start_temp_file" "$baseline_end_temp_file" 2>/dev/null || true
+
     cat > "$POWER_MEM_REPORT_FILE" << EOF
 {
   "llm_test_start_time": "$llm_start_time_readable",
@@ -780,7 +1050,8 @@ generate_final_report() {
     "actual_min_average_power_ma": $safe_baseline_actual_min_avg_power,
     "actual_max_average_power_ma": $safe_baseline_actual_max_avg_power,
     "duration_ms": $safe_baseline_duration_ms,
-    "duration_s": $safe_baseline_duration_s
+    "duration_s": $safe_baseline_duration_s,
+    "component_temperature": $baseline_component_temperature
   },
   "llm_test": {
     "computed_power_mah": $safe_actual_computed_power,
@@ -791,7 +1062,8 @@ generate_final_report() {
     "actual_min_average_power_ma": $safe_actual_actual_min_avg_power,
     "actual_max_average_power_ma": $safe_actual_actual_max_avg_power,
     "duration_ms": $safe_runtime_ms,
-    "duration_s": $safe_runtime_s
+    "duration_s": $safe_runtime_s,
+    "component_temperature": $llm_component_temperature
   },
   "test_environment": {
     "device_info": "$(getprop ro.product.model 2>/dev/null || echo 'Unknown')",
@@ -838,6 +1110,9 @@ main() {
     local actual_start_time=$(echo "$llm_test_result" | awk '{print $7}')
     local actual_end_time=$(echo "$llm_test_result" | awk '{print $8}')
 
+
+
+
     # Phase 2: 基线测试
     local baseline_computed_power="-1.0"
     local baseline_actual_min_power="-1.0"
@@ -854,6 +1129,11 @@ main() {
         baseline_actual_max_power=$(echo "$baseline_test_result" | awk '{print $3}')
         baseline_soc_power=$(echo "$baseline_test_result" | awk '{print $4}')
         baseline_duration_ms=$(echo "$baseline_test_result" | awk '{print $5}')
+
+        # 保存基线温度数据到临时文件
+        local baseline_start_temp_file="temp_baseline_start.json"
+        local baseline_end_temp_file="temp_baseline_end.json"
+
     else
         log_error "LLM测试时长无效(runtime_s=$runtime_s)，无法进行基线测试"
     fi

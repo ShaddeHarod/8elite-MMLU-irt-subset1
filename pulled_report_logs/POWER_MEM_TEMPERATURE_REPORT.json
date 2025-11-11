@@ -1,0 +1,90 @@
+{
+  "llm_test_start_time": "2025-11-10",
+  "llm_test_end_time": "17:29:13",
+  "genie_net_power": {
+    "soc_consumption_mah": 71.50027.00028.00031.00031.00029.00030.00029.00030.00037.00029.00029.0000.00027.00036.00039.00039.00034.00038.00038.00039.00037.00036.00038.47227.00035.00039.00039.00034.00038.00038.00038.00037.00036.00039.0000.00027.00028.00032.00031.00030.00031.00031.00031.00037.00030.00031.000,
+    "soc_average_power_ma": -1.0,
+    "soc_power_per_inference_mah": -1.0,
+    "temp_unused_info": {
+      "computed_consumption_mah": -1.0,
+      "actual_min_consumption_mah": -1.0,
+      "actual_max_consumption_mah": -1.0,
+      "computed_average_power_ma": -1.0,
+      "actual_min_average_power_ma": -1.0,
+      "actual_max_average_power_ma": -1.0,
+      "computed_power_per_inference_mah": -1.0,
+      "actual_min_power_per_inference_mah": -1.0,
+      "actual_max_power_per_inference_mah": -1.0
+    }
+  },
+  "performance_metrics": {
+    "total_genie_processes": 300,
+    "completed_questions": 300,
+    "average_time_per_question_ms": -1
+  },
+    "memory_analysis": {
+    "baseline_mem_kb": 4604604,
+    "baseline_mem_mb": 4496.7,
+    "peak_mem_kb": 7159864,
+    "peak_mem_mb": 6992.1,
+    "model_memory_kb": 2555260,
+    "model_memory_mb": 2495.4,
+    "genie_active_samples": 1943,
+    "genie_inactive_samples": 820,
+    "total_samples": 2763
+  },
+  "baseline_test": {
+    "computed_power_mah": -1.0,
+    "actual_power_min_mah": -1.0,
+    "actual_power_max_mah": -1.0,
+    "computed_average_power_ma": -1.0,
+    "actual_min_average_power_ma": -1.0,
+    "actual_max_average_power_ma": -1.0,
+    "duration_ms": -1,
+    "duration_s": 711,
+    "component_temperature": {
+  "battery": { "start_temperature": , "end_temperature":  },
+  "cpu-0": { "start_temperature": , "end_temperature":  },
+  "cpu-1": { "start_temperature": , "end_temperature":  },
+  "cpuss": { "start_temperature": , "end_temperature":  },
+  "ddr": { "start_temperature": , "end_temperature":  },
+  "gpuss": { "start_temperature": , "end_temperature":  },
+  "nsphmx": { "start_temperature": , "end_temperature":  },
+  "nsphvx": { "start_temperature": , "end_temperature":  },
+  "shell_back": { "start_temperature": , "end_temperature":  },
+  "shell_frame": { "start_temperature": , "end_temperature":  },
+  "shell_front": { "start_temperature": , "end_temperature":  }
+}
+  },
+  "llm_test": {
+    "computed_power_mah": -1.0,
+    "actual_power_min_mah": -1.0,
+    "actual_power_max_mah": -1.0,
+    "soc_power_mah": 71.50027.00028.00031.00031.00029.00030.00029.00030.00037.00029.00029.0000.00027.00036.00039.00039.00034.00038.00038.00039.00037.00036.00038.47227.00035.00039.00039.00034.00038.00038.00038.00037.00036.00039.0000.00027.00028.00032.00031.00030.00031.00031.00031.00037.00030.00031.000,
+    "computed_average_power_ma": -1.0,
+    "actual_min_average_power_ma": -1.0,
+    "actual_max_average_power_ma": -1.0,
+    "duration_ms": -1,
+    "duration_s": 711,
+    "component_temperature": {
+  "battery": { "start_temperature": , "end_temperature":  },
+  "cpu-0": { "start_temperature": , "end_temperature":  },
+  "cpu-1": { "start_temperature": , "end_temperature":  },
+  "cpuss": { "start_temperature": , "end_temperature":  },
+  "ddr": { "start_temperature": , "end_temperature":  },
+  "gpuss": { "start_temperature": , "end_temperature":  },
+  "nsphmx": { "start_temperature": , "end_temperature":  },
+  "nsphvx": { "start_temperature": , "end_temperature":  },
+  "shell_back": { "start_temperature": , "end_temperature":  },
+  "shell_frame": { "start_temperature": , "end_temperature":  },
+  "shell_front": { "start_temperature": , "end_temperature":  }
+}
+  },
+  "test_environment": {
+    "device_info": "PKG110",
+    "android_version": "15",
+    "real_ram_size": "11.0",
+    "soc_chip": "pineapple"
+  },
+  "generated_at": "2025-11-10 17:53:47"
+}

@@ -221,7 +221,7 @@ def analyze_power_memory_report(base_dir):
     """
     分析功耗内存报告
     """
-    power_mem_report_path = os.path.join(base_dir, "pulled_report_logs", "POWER_MEM_REPORT.json")
+    power_mem_report_path = os.path.join(base_dir, "pulled_report_logs", "POWER_MEM_TEMPERATURE_REPORT.json")
 
     if not os.path.exists(power_mem_report_path):
         print(f"警告：功耗内存报告文件不存在: {power_mem_report_path}")
@@ -247,6 +247,10 @@ def analyze_power_memory_report(base_dir):
             "peak_mem_mb": round(report_data.get("memory_analysis", {}).get("peak_mem_kb", 0) / 1024, 2),
             "model_mem_mb": round(report_data.get("memory_analysis", {}).get("model_memory_kb", 0) / 1024, 2),
 
+            # 温度信息
+            "llm_temperature": report_data.get("llm_test", {}).get("component_temperature", {}),
+            "baseline_temperature": report_data.get("baseline_test", {}).get("component_temperature", {}),
+
             # 测试环境信息
             "test_environment": report_data.get("test_environment", {})
         }
@@ -256,6 +260,128 @@ def analyze_power_memory_report(base_dir):
     except Exception as e:
         print(f"分析功耗内存报告时出错: {e}")
         return None
+
+def display_temperature_info(power_mem_analysis):
+    """
+    显示温度信息
+    """
+    if not power_mem_analysis:
+        print("\n温度信息：无数据")
+        return
+
+    llm_temp = power_mem_analysis.get('llm_temperature', {})
+    baseline_temp = power_mem_analysis.get('baseline_temperature', {})
+
+    if not llm_temp and not baseline_temp:
+        print("\n温度信息：无数据")
+        return
+
+    print(f"\n=== 温度信息 ===")
+
+    # 定义组件中文名称
+    component_names = {
+        'battery': '电池',
+        'cpu-0': 'CPU-0集群',
+        'cpu-1': 'CPU-1集群',
+        'cpuss': 'CPU子系统',
+        'ddr': 'DDR内存',
+        'gpuss': 'GPU子系统',
+        'nsphmx': 'NPU高性能部分',
+        'nsphvx': 'NPU向量处理单元',
+        'shell_back': '设备背面',
+        'shell_frame': '设备边框',
+        'shell_front': '设备正面'
+    }
+
+    components = ['battery', 'cpu-0', 'cpu-1', 'cpuss', 'ddr', 'gpuss', 'nsphmx', 'nsphvx', 'shell_back', 'shell_frame', 'shell_front']
+
+    print(f"{'组件':<15} {'基线开始':<10} {'基线结束':<10} {'LLM开始':<10} {'LLM结束':<10} {'LLM温升':<10}")
+    print("-" * 70)
+
+    for component in components:
+        comp_name = component_names.get(component, component)
+
+        # 获取温度值
+        baseline_start = baseline_temp.get(component, {}).get('start_temperature', 0)
+        baseline_end = baseline_temp.get(component, {}).get('end_temperature', 0)
+        llm_start = llm_temp.get(component, {}).get('start_temperature', 0)
+        llm_end = llm_temp.get(component, {}).get('end_temperature', 0)
+
+        # 计算LLM测试期间的温升
+        temp_rise = llm_end - llm_start if llm_start > 0 and llm_end > 0 else 0
+
+        print(f"{comp_name:<15} {baseline_start:<10} {baseline_end:<10} {llm_start:<10} {llm_end:<10} {temp_rise:<10}")
+
+def append_or_create_csv(csv_path, headers_dict, csv_data):
+    """
+    创建新的CSV文件或在现有文件中添加新列
+    """
+    # 生成新的列数据
+    new_rows = []
+    for key, header_name in headers_dict.items():
+        value = csv_data.get(key, '')
+        new_rows.append([header_name, value])
+
+    if os.path.exists(csv_path):
+        # 文件存在，读取现有数据并添加新列
+        existing_data = []
+        try:
+            with open(csv_path, 'r', encoding='utf-8-sig') as f:
+                reader = csv.reader(f)
+                existing_data = list(reader)
+        except Exception as e:
+            print(f"读取现有CSV文件失败，将创建新文件: {e}")
+            existing_data = []
+
+        # 确保现有数据至少有两列（属性名称和数值）
+        if len(existing_data) > 0:
+            # 在表头添加空列头
+            existing_data[0].append('')
+
+            # 为每一行添加新数据
+            for i, row in enumerate(new_rows):
+                if i + 1 < len(existing_data):
+                    # 匹配现有行，添加新值
+                    existing_data[i + 1].append(row[1] if len(row) > 1 else '')
+                else:
+                    # 新行，添加到末尾
+                    if len(row) >= 2:
+                        existing_data.append([row[0], row[1], ''])
+                    else:
+                        existing_data.append([row[0], '', ''])
+
+            # 写回文件
+            with open(csv_path, 'w', encoding='utf-8-sig', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerows(existing_data)
+        else:
+            # 现有文件为空或格式错误，创建新文件
+            with open(csv_path, 'w', encoding='utf-8-sig', newline='') as f:
+                writer = csv.writer(f)
+                # 根据文件路径判断是中文还是英文版
+                if 'chinese' in csv_path:
+                    writer.writerow(['属性名称', '数值', ''])
+                else:
+                    writer.writerow(['Metric', 'Value', ''])
+                for row in new_rows:
+                    if len(row) >= 2:
+                        writer.writerow([row[0], row[1], ''])
+                    else:
+                        writer.writerow([row[0], '', ''])
+    else:
+        # 文件不存在，创建新文件
+        with open(csv_path, 'w', encoding='utf-8-sig', newline='') as f:
+            writer = csv.writer(f)
+            # 根据文件路径判断是中文还是英文版
+            if 'chinese' in csv_path:
+                writer.writerow(['属性名称', '数值', ''])
+            else:
+                writer.writerow(['Metric', 'Value', ''])
+            for row in new_rows:
+                if len(row) >= 2:
+                    writer.writerow([row[0], row[1], ''])
+                else:
+                    writer.writerow([row[0], '', ''])
 
 def generate_final_csv_report(all_subjects_results, power_mem_analysis, analysis_results_dir):
     """
@@ -383,23 +509,11 @@ def generate_final_csv_report(all_subjects_results, power_mem_analysis, analysis
     english_csv_path = os.path.join(analysis_results_dir, "final_result_english.csv")
 
     try:
-        # 生成中文版CSV
-        with open(chinese_csv_path, 'w', encoding='utf-8-sig', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(['属性名称', '数值'])
+        # 生成中文版CSV（追加列或创建新文件）
+        append_or_create_csv(chinese_csv_path, chinese_headers, csv_data)
 
-            for key, chinese_name in chinese_headers.items():
-                value = csv_data.get(key, '')
-                writer.writerow([chinese_name, value])
-
-        # 生成英文版CSV
-        with open(english_csv_path, 'w', encoding='utf-8-sig', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(['Metric', 'Value'])
-
-            for key, english_name in english_headers.items():
-                value = csv_data.get(key, '')
-                writer.writerow([english_name, value])
+        # 生成英文版CSV（追加列或创建新文件）
+        append_or_create_csv(english_csv_path, english_headers, csv_data)
 
         print(f"中文CSV报告已生成: {chinese_csv_path}")
         print(f"英文CSV报告已生成: {english_csv_path}")
@@ -417,6 +531,9 @@ def generate_final_csv_report(all_subjects_results, power_mem_analysis, analysis
         print(f"通用First Token时长: {general_first_token_time:.0f} 微秒")
         print(f"First Token时长: {first_token_time:.0f} 微秒")
         print(f"平均Token吞吐率: {avg_token_generation_rate:.3f} 个/秒")
+
+        # 显示温度信息
+        display_temperature_info(power_mem_analysis)
 
     except Exception as e:
         print(f"生成CSV报告时出错: {e}")
