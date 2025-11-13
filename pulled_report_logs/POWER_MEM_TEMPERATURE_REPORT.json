@@ -1,59 +1,59 @@
 {
-  "llm_test_start_time": "2025-11-13T10:37:55",
-  "llm_test_end_time": "2025-11-13T10:47:16",
+  "llm_test_start_time": "2025-11-13T15:49:41",
+  "llm_test_end_time": "2025-11-13T15:59:12",
   "genie_net_power": {
-    "soc_consumption_mah": 60.291,
-    "soc_average_power_ma": 401.940,
-    "soc_power_per_inference_mah": 0.200970
+    "soc_consumption_mah": 59.981,
+    "soc_average_power_ma": 391.889,
+    "soc_power_per_inference_mah": 0.199937
   },
   "performance_metrics": {
     "total_genie_processes": 300,
     "completed_questions": 300,
-    "average_time_per_question_ms": 1802
+    "average_time_per_question_ms": 1837
   },
     "memory_analysis": {
-    "baseline_mem_kb": 4782936,
-    "baseline_mem_mb": 4670.8,
-    "peak_mem_kb": 7421352,
-    "peak_mem_mb": 7247.4,
-    "model_memory_kb": 2638416,
-    "model_memory_mb": 2576.6,
-    "genie_active_samples": 2094,
-    "genie_inactive_samples": 492,
-    "total_samples": 2586
+    "baseline_mem_kb": 4476328,
+    "baseline_mem_mb": 4371.4,
+    "peak_mem_kb": 7445252,
+    "peak_mem_mb": 7270.8,
+    "model_memory_kb": 2968924,
+    "model_memory_mb": 2899.3,
+    "genie_active_samples": 2137,
+    "genie_inactive_samples": 501,
+    "total_samples": 2638
   },
   "baseline_test": {
-    "soc_power_mah": 0.609,
-    "duration_s": 540,
+    "soc_power_mah": 0.619,
+    "duration_s": 551,
     "component_temperature": {
   "battery": { "start_temperature": 33, "end_temperature": 31 },
   "cpu-0": { "start_temperature": 0, "end_temperature": 0 },
   "cpu-1": { "start_temperature": 1, "end_temperature": 1 },
-  "cpuss": { "start_temperature": 41, "end_temperature": 33 },
-  "ddr": { "start_temperature": 41, "end_temperature": 33 },
-  "gpuss": { "start_temperature": 40, "end_temperature": 32 },
+  "cpuss": { "start_temperature": 42, "end_temperature": 34 },
+  "ddr": { "start_temperature": 41, "end_temperature": 34 },
+  "gpuss": { "start_temperature": 41, "end_temperature": 33 },
   "nsphmx": { "start_temperature": 40, "end_temperature": 33 },
-  "nsphvx": { "start_temperature": 39, "end_temperature": 32 },
+  "nsphvx": { "start_temperature": 40, "end_temperature": 33 },
   "shell_back": { "start_temperature": 34, "end_temperature": 31 },
   "shell_frame": { "start_temperature": 33, "end_temperature": 30 },
-  "shell_front": { "start_temperature": 35, "end_temperature": 30 }
+  "shell_front": { "start_temperature": 35, "end_temperature": 31 }
 }
   },
   "llm_test": {
-    "soc_power_mah": 60.9,
-    "duration_ms": 540474,
+    "soc_power_mah": 60.6,
+    "duration_ms": 551170,
     "component_temperature": {
-  "battery": { "start_temperature": 28, "end_temperature": 33 },
+  "battery": { "start_temperature": 27, "end_temperature": 33 },
   "cpu-0": { "start_temperature": 0, "end_temperature": 0 },
   "cpu-1": { "start_temperature": 1, "end_temperature": 1 },
-  "cpuss": { "start_temperature": 41, "end_temperature": 41 },
-  "ddr": { "start_temperature": 32, "end_temperature": 41 },
-  "gpuss": { "start_temperature": 31, "end_temperature": 40 },
-  "nsphmx": { "start_temperature": 31, "end_temperature": 40 },
-  "nsphvx": { "start_temperature": 30, "end_temperature": 40 },
-  "shell_back": { "start_temperature": 28, "end_temperature": 34 },
-  "shell_frame": { "start_temperature": 27, "end_temperature": 33 },
-  "shell_front": { "start_temperature": 28, "end_temperature": 35 }
+  "cpuss": { "start_temperature": 42, "end_temperature": 42 },
+  "ddr": { "start_temperature": 31, "end_temperature": 41 },
+  "gpuss": { "start_temperature": 30, "end_temperature": 40 },
+  "nsphmx": { "start_temperature": 30, "end_temperature": 40 },
+  "nsphvx": { "start_temperature": 29, "end_temperature": 40 },
+  "shell_back": { "start_temperature": 27, "end_temperature": 34 },
+  "shell_frame": { "start_temperature": 26, "end_temperature": 33 },
+  "shell_front": { "start_temperature": 27, "end_temperature": 35 }
 }
   },
   "test_environment": {
@@ -62,5 +62,5 @@
     "real_ram_size": "10.9",
     "soc_chip": "sun"
   },
-  "generated_at": "2025-11-13 10:56:20"
+  "generated_at": "2025-11-13 16:08:27"
 }

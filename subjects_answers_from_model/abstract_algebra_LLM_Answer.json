@@ -4,81 +4,81 @@
     {
       "question_index": 0,
       "global_index": 0,
-      "start_timestamp": "2025-11-13 10:37:56",
+      "start_timestamp": "2025-11-13 15:49:41",
       "final_answer": "D",
       "model_output": "答案：D",
       "performance_metrics": {
-        "init_time_us": 989356,
-        "prompt_processing_time_us": 154954,
-        "prompt_processing_rate_toks_per_sec": 916.590271,
-        "token_generation_time_us": 117488,
-        "token_generation_rate_toks_per_sec": 34.046032
+        "init_time_us": 1729676,
+        "prompt_processing_time_us": 153583,
+        "prompt_processing_rate_toks_per_sec": 925.069397,
+        "token_generation_time_us": 112056,
+        "token_generation_rate_toks_per_sec": 35.696438
       },
-      "end_timestamp": "2025-11-13 10:37:57"
+      "end_timestamp": "2025-11-13 15:49:43"
     }
 ,
     {
       "question_index": 1,
       "global_index": 1,
-      "start_timestamp": "2025-11-13 10:37:57",
+      "start_timestamp": "2025-11-13 15:49:43",
       "final_answer": "D",
       "model_output": "答案：D",
       "performance_metrics": {
-        "init_time_us": 1608944,
-        "prompt_processing_time_us": 156682,
-        "prompt_processing_rate_toks_per_sec": 919.117676,
-        "token_generation_time_us": 117728,
-        "token_generation_rate_toks_per_sec": 33.976624
+        "init_time_us": 2029190,
+        "prompt_processing_time_us": 154498,
+        "prompt_processing_rate_toks_per_sec": 932.835815,
+        "token_generation_time_us": 117516,
+        "token_generation_rate_toks_per_sec": 34.037918
       },
-      "end_timestamp": "2025-11-13 10:37:59"
+      "end_timestamp": "2025-11-13 15:49:46"
     }
 ,
     {
       "question_index": 2,
       "global_index": 2,
-      "start_timestamp": "2025-11-13 10:37:59",
+      "start_timestamp": "2025-11-13 15:49:46",
       "final_answer": "C",
       "model_output": "答案：C",
       "performance_metrics": {
-        "init_time_us": 919670,
-        "prompt_processing_time_us": 151072,
-        "prompt_processing_rate_toks_per_sec": 1046.025146,
-        "token_generation_time_us": 113684,
-        "token_generation_rate_toks_per_sec": 35.185249
+        "init_time_us": 1206052,
+        "prompt_processing_time_us": 150558,
+        "prompt_processing_rate_toks_per_sec": 1050.420166,
+        "token_generation_time_us": 112730,
+        "token_generation_rate_toks_per_sec": 35.483643
       },
-      "end_timestamp": "2025-11-13 10:38:01"
+      "end_timestamp": "2025-11-13 15:49:48"
     }
 ,
     {
       "question_index": 3,
       "global_index": 3,
-      "start_timestamp": "2025-11-13 10:38:01",
+      "start_timestamp": "2025-11-13 15:49:48",
       "final_answer": "D",
       "model_output": "答案：D",
       "performance_metrics": {
-        "init_time_us": 1125191,
-        "prompt_processing_time_us": 148884,
-        "prompt_processing_rate_toks_per_sec": 1088.139282,
-        "token_generation_time_us": 112873,
-        "token_generation_rate_toks_per_sec": 35.438374
+        "init_time_us": 1100031,
+        "prompt_processing_time_us": 150578,
+        "prompt_processing_rate_toks_per_sec": 1076.426270,
+        "token_generation_time_us": 117868,
+        "token_generation_rate_toks_per_sec": 33.936268
       },
-      "end_timestamp": "2025-11-13 10:38:02"
+      "end_timestamp": "2025-11-13 15:49:49"
     }
 ,
     {
       "question_index": 4,
       "global_index": 4,
-      "start_timestamp": "2025-11-13 10:38:02",
+      "start_timestamp": "2025-11-13 15:49:49",
       "final_answer": "C",
       "model_output": "答案：C",
       "performance_metrics": {
-        "init_time_us": 1478607,
-        "prompt_processing_time_us": 157839,
-        "prompt_processing_rate_toks_per_sec": 1109.877930,
-        "token_generation_time_us": 111684,
-        "token_generation_rate_toks_per_sec": 35.815334
+        "init_time_us": 1102639,
+        "prompt_processing_time_us": 152887,
+        "prompt_processing_rate_toks_per_sec": 1145.475342,
+        "token_generation_time_us": 143541,
+        "token_generation_rate_toks_per_sec": 27.866796
       },
-      "end_timestamp": "2025-11-13 10:38:04"
+      "end_timestamp": "2025-11-13 15:49:51"
     }
 
   ]

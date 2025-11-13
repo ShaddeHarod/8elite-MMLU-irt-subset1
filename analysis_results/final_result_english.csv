@@ -1,21 +1,21 @@
-﻿Metric,Value
-Device Info,PKR110
-Android Version,15
-RAM Size (GB),10.9
-SoC Chip,sun
-Question Equal Weight Accuracy (%),49.33%
-Subject Equal Weight Accuracy (%),48.09%
-Baseline Memory (MB),4592.33
-Peak Memory (MB),7228.88
-Model Memory (MB),2636.55
-SoC Consumption (mAh),60.608
-SoC Average Power (mA),403.306
-Power Per Inference (mAh),0.202027
-Average Token Throughput (tokens/sec),34.339
-General First Token Time (μs),1235569.0
-First Token Time (μs),166294.0
-Average Time Per Question (ms),1804
-Test Start Time,2025-11-13T12:23:10
-Test End Time,2025-11-13T12:32:31
-Test Duration (ms),541339
-Report Generated At,2025-11-13 12:41:36
+﻿Metric,Value,
+Device Info,PKR110,PKR110
+Android Version,15,15
+RAM Size (GB),10.9,10.9
+SoC Chip,sun,sun
+Question Equal Weight Accuracy (%),49.33%,49.33%
+Subject Equal Weight Accuracy (%),48.09%,48.09%
+Baseline Memory (MB),4592.33,4371.41
+Peak Memory (MB),7228.88,7270.75
+Model Memory (MB),2636.55,2899.34
+SoC Consumption (mAh),60.608,59.981
+SoC Average Power (mA),403.306,391.889
+Power Per Inference (mAh),0.202027,0.199937
+Average Token Throughput (tokens/sec),34.339,34.077
+General First Token Time (μs),1235569.0,1263961.0
+First Token Time (μs),166294.0,167448.0
+Average Time Per Question (ms),1804,1837
+Test Start Time,2025-11-13T12:23:10,2025-11-13T15:49:41
+Test End Time,2025-11-13T12:32:31,2025-11-13T15:59:12
+Test Duration (ms),541339,551170
+Report Generated At,2025-11-13 12:41:36,2025-11-13 16:08:27

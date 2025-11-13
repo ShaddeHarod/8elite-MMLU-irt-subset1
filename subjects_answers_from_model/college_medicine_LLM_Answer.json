@@ -4,17 +4,17 @@
     {
       "question_index": 0,
       "global_index": 0,
-      "start_timestamp": "2025-11-13 10:39:23",
+      "start_timestamp": "2025-11-13 15:51:15",
       "final_answer": "D",
       "model_output": "答案：D",
       "performance_metrics": {
-        "init_time_us": 1021665,
-        "prompt_processing_time_us": 154233,
-        "prompt_processing_rate_toks_per_sec": 1213.592285,
-        "token_generation_time_us": 112624,
-        "token_generation_rate_toks_per_sec": 35.516407
+        "init_time_us": 1041675,
+        "prompt_processing_time_us": 153765,
+        "prompt_processing_rate_toks_per_sec": 1216.545044,
+        "token_generation_time_us": 112235,
+        "token_generation_rate_toks_per_sec": 35.640457
       },
-      "end_timestamp": "2025-11-13 10:39:25"
+      "end_timestamp": "2025-11-13 15:51:17"
     }
 
   ]

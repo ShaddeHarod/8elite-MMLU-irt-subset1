@@ -1,4 +1,18 @@
 conda activate TinyBenchEnv
+
+# 删除已存在的文件夹
+if (Test-Path ".\pulled_report_logs") {
+    Remove-Item -Path ".\pulled_report_logs" -Recurse -Force
+}
+
+if (Test-Path ".\subjects_answers_from_model") {
+    Remove-Item -Path ".\subjects_answers_from_model" -Recurse -Force
+}
+
+if (Test-Path ".\subjects_perf_results") {
+    Remove-Item -Path ".\subjects_perf_results" -Recurse -Force
+}
+
 # 1. 列出所有匹配的远端文件路径
 $fileList = adb shell ls data/local/tmp/genie-qwen2.5-3b/result/*_LLM_Answer.json
 
