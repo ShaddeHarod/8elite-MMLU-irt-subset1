@@ -317,13 +317,13 @@ def append_or_create_csv(csv_path, headers_dict, csv_data):
     创建新的CSV文件或在现有文件中添加新列
     """
     # 生成新的列数据
-    new_rows = []
+    new_rows = {}
     for key, header_name in headers_dict.items():
         value = csv_data.get(key, '')
-        new_rows.append([header_name, value])
+        new_rows[header_name] = value
 
     if os.path.exists(csv_path):
-        # 文件存在，读取现有数据并添加新列
+        # 文件存在，读取现有数据并按指标名称匹配
         existing_data = []
         try:
             with open(csv_path, 'r', encoding='utf-8-sig') as f:
@@ -333,55 +333,63 @@ def append_or_create_csv(csv_path, headers_dict, csv_data):
             print(f"读取现有CSV文件失败，将创建新文件: {e}")
             existing_data = []
 
-        # 确保现有数据至少有两列（属性名称和数值）
-        if len(existing_data) > 0:
-            # 在表头添加空列头
-            existing_data[0].append('')
+        # 验证文件格式并建立指标名称映射
+        if len(existing_data) > 1:
+            # 创建指标名称到行索引的映射（跳过表头行）
+            metric_to_row = {}
+            for i, row in enumerate(existing_data[1:], 1):  # 从第1行开始（跳过表头）
+                if len(row) > 0 and row[0].strip():  # 确保有指标名称
+                    metric_to_row[row[0].strip()] = i
 
-            # 为每一行添加新数据
-            for i, row in enumerate(new_rows):
-                if i + 1 < len(existing_data):
-                    # 匹配现有行，添加新值
-                    existing_data[i + 1].append(row[1] if len(row) > 1 else '')
+            # 确定当前列数
+            current_cols = len(existing_data[0]) if existing_data else 0
+
+            # 为每个新指标添加数据，直接追加到现有列后面
+            for header_name, value in new_rows.items():
+                if header_name in metric_to_row:
+                    # 找到对应行，直接添加新值到末尾
+                    row_idx = metric_to_row[header_name]
+                    existing_data[row_idx].append(str(value))
                 else:
-                    # 新行，添加到末尾
-                    if len(row) >= 2:
-                        existing_data.append([row[0], row[1], ''])
-                    else:
-                        existing_data.append([row[0], '', ''])
+                    # 新指标，添加新行
+                    new_row = [header_name]
+                    # 填充前面的空列，与现有行保持相同列数-1
+                    while len(new_row) < len(existing_data[0]) - 1:
+                        new_row.append('')
+                    new_row.append(str(value))
+                    existing_data.append(new_row)
+
+            # 确保表头行的列数与数据行保持一致
+            max_cols = max(len(row) for row in existing_data) if existing_data else 0
+            while len(existing_data[0]) < max_cols:
+                existing_data[0].append('')
 
             # 写回文件
             with open(csv_path, 'w', encoding='utf-8-sig', newline='') as f:
                 writer = csv.writer(f)
                 writer.writerows(existing_data)
         else:
-            # 现有文件为空或格式错误，创建新文件
-            with open(csv_path, 'w', encoding='utf-8-sig', newline='') as f:
-                writer = csv.writer(f)
-                # 根据文件路径判断是中文还是英文版
-                if 'chinese' in csv_path:
-                    writer.writerow(['属性名称', '数值', ''])
-                else:
-                    writer.writerow(['Metric', 'Value', ''])
-                for row in new_rows:
-                    if len(row) >= 2:
-                        writer.writerow([row[0], row[1], ''])
-                    else:
-                        writer.writerow([row[0], '', ''])
+            # 现有文件格式错误，重新创建
+            print(f"现有CSV文件格式不正确，重新创建文件: {csv_path}")
+            create_new_csv(csv_path, new_rows)
     else:
         # 文件不存在，创建新文件
-        with open(csv_path, 'w', encoding='utf-8-sig', newline='') as f:
-            writer = csv.writer(f)
-            # 根据文件路径判断是中文还是英文版
-            if 'chinese' in csv_path:
-                writer.writerow(['属性名称', '数值', ''])
-            else:
-                writer.writerow(['Metric', 'Value', ''])
-            for row in new_rows:
-                if len(row) >= 2:
-                    writer.writerow([row[0], row[1], ''])
-                else:
-                    writer.writerow([row[0], '', ''])
+        create_new_csv(csv_path, new_rows)
+
+def create_new_csv(csv_path, new_rows):
+    """
+    创建新的CSV文件
+    """
+    with open(csv_path, 'w', encoding='utf-8-sig', newline='') as f:
+        writer = csv.writer(f)
+        # 根据文件路径判断是中文还是英文版
+        if 'chinese' in csv_path:
+            writer.writerow(['属性名称', '数值'])
+        else:
+            writer.writerow(['Metric', 'Value'])
+
+        for header_name, value in new_rows.items():
+            writer.writerow([header_name, str(value)])
 
 def generate_final_csv_report(all_subjects_results, power_mem_analysis, analysis_results_dir):
     """
