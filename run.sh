@@ -203,74 +203,51 @@ get_power_consumption() {
     local power_section
     power_section=$(echo "$bs_output" | awk '/Estimated power use \(mAh\):/{found=1; next} found && /^ /{print} !/^ / && found{exit}')
 
-    # 打印power_section到stderr用于调试
-    echo "DEBUG: power_section content:" >&2
-    echo "$power_section" >&2
-    echo "DEBUG: end of power_section" >&2
 
     if [ -n "$power_section" ]; then
         # 提取 Computed drain
-        echo "DEBUG: 使用sed提取 Computed drain" >&2
         computed_drain=$(echo "$power_section" | sed -n 's/.*Computed drain: \([0-9.-]*\).*/\1/p')
-        echo "DEBUG: 提取的 computed_drain 原始值: '$computed_drain'" >&2
 
         # 提取 actual drain
-        echo "DEBUG: 使用sed提取 actual drain" >&2
         local actual_drain_raw
         actual_drain_raw=$(echo "$power_section" | sed -n 's/.*actual drain: \([0-9.-]*\).*/\1/p')
-        echo "DEBUG: 提取的 actual_drain_raw 原始值: '$actual_drain_raw'" >&2
 
         # 验证 computed drain
-        echo "DEBUG: 开始验证 computed_drain: '$computed_drain'" >&2
-        echo "DEBUG: computed_drain 是否为空: $([ -z "$computed_drain" ] && echo "是" || echo "否")" >&2
         if [ -n "$computed_drain" ] && validate_power_value "$computed_drain"; then
-            echo "DEBUG: computed_drain 验证通过" >&2
             log_info "Computed drain: ${computed_drain} mAh"
         else
-            echo "DEBUG: computed_drain 验证失败，设置为 -1.0" >&2
             computed_drain="-1.0"
             log_info "Computed drain 无效，设置为 -1.0"
         fi
 
         # 处理 actual drain（可能是范围）
-        echo "DEBUG: 开始验证 actual_drain_raw: '$actual_drain_raw'" >&2
-        echo "DEBUG: actual_drain_raw 是否为空: $([ -z "$actual_drain_raw" ] && echo "是" || echo "否")" >&2
         if [ -n "$actual_drain_raw" ]; then
-            echo "DEBUG: actual_drain_raw 不为空，继续处理" >&2
             if echo "$actual_drain_raw" | grep -q '-'; then
-                echo "DEBUG: 检测到 actual_drain_raw 是范围值: '$actual_drain_raw'" >&2
                 # 是范围值，如 "41.0-52.0"
                 actual_drain_min=$(echo "$actual_drain_raw" | cut -d'-' -f1)
                 actual_drain_max=$(echo "$actual_drain_raw" | cut -d'-' -f2)
-                echo "DEBUG: 解析范围值 - min: '$actual_drain_min', max: '$actual_drain_max'" >&2
 
                 # 验证范围值
                 if validate_power_value "$actual_drain_min" && validate_power_value "$actual_drain_max"; then
-                    echo "DEBUG: actual drain 范围值验证通过" >&2
                     log_info "Actual drain 范围: ${actual_drain_min} - ${actual_drain_max} mAh"
                 else
-                    echo "DEBUG: actual drain 范围值验证失败，设置为 -1.0" >&2
                     actual_drain_min="-1.0"
                     actual_drain_max="-1.0"
                     log_info "Actual drain 范围值无效，设置为 -1.0"
                 fi
             else
-                echo "DEBUG: 检测到 actual_drain_raw 是单一值: '$actual_drain_raw'" >&2
                 # 单一值
                 if validate_power_value "$actual_drain_raw"; then
-                    echo "DEBUG: actual drain 单一值验证通过" >&2
                     actual_drain_min="$actual_drain_raw"
                     actual_drain_max="$actual_drain_raw"
                     log_info "Actual drain: ${actual_drain_raw} mAh"
                 else
-                    echo "DEBUG: actual drain 单一值验证失败，设置为 -1.0" >&2
                     actual_drain_min="-1.0"
                     actual_drain_max="-1.0"
                     log_info "Actual drain 值无效，设置为 -1.0"
                 fi
             fi
         else
-            echo "DEBUG: actual_drain_raw 为空，设置为 -1.0" >&2
             log_info "未找到 actual drain 数据，设置为 -1.0"
         fi
     else
@@ -279,7 +256,6 @@ get_power_consumption() {
 
     # 提取SoC耗电量（从Global部分的cpu行获取）
     if [ -n "$power_section" ]; then
-        echo "DEBUG: 开始提取SoC耗电量" >&2
         soc_power_mah=$(echo "$power_section" | sed -n '/^    Global$/,/^[^ ]/ {
   /^      cpu: /{
     s/^      cpu: \([0-9.-]*\).*$/\1/p
@@ -290,11 +266,9 @@ get_power_consumption() {
 
         # 验证SoC耗电量值
         if [ -n "$soc_power_mah" ] && validate_power_value "$soc_power_mah"; then
-            echo "DEBUG: soc_power_mah 验证通过" >&2
             log_info "SoC耗电量（来自Global CPU）: ${soc_power_mah} mAh"
         else
-            echo "DEBUG: soc_power_mah 验证失败，设置为 -1.0" >&2
-            soc_power_mah="-1.0"
+           soc_power_mah="-1.0"
             log_info "SoC耗电量无效，设置为 -1.0"
         fi
     else
@@ -796,7 +770,7 @@ generate_final_report() {
     local baseline_computed_power_from_log="-1.0"
     local baseline_actual_min_power_from_log="-1.0"
     local baseline_actual_max_power_from_log="-1.0"
-
+    local baseline_soc_power_from_log="-1.0"
     if [ -f "$POWER_LOG_FILE" ]; then
         # 提取基线时长，确保只获取数值部分
         baseline_duration_s=$(grep "BASELINE_TEST_DURATION_S=" "$POWER_LOG_FILE" | tail -1 | cut -d'=' -f2 | tr -d ' \n\r' || echo "-1")
@@ -830,47 +804,15 @@ generate_final_report() {
     local timestamp
     timestamp=$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S')
 
-    # 确保所有数值变量都是有效的
-    local safe_baseline_computed_power=${baseline_computed_power_from_log:-"-1.0"}
-    local safe_baseline_actual_min_power=${baseline_actual_min_power_from_log:-"-1.0"}
-    local safe_baseline_actual_max_power=${baseline_actual_max_power_from_log:-"-1.0"}
+    local safe_baseline_soc_power=${baseline_soc_power_from_log:-"-1.0"}
     local safe_baseline_duration_ms=${baseline_duration_ms:-"-1"}
-    local safe_actual_computed_power=${actual_computed_power:-"-1.0"}
-    local safe_actual_actual_min_power=${actual_actual_min_power:-"-1.0"}
-    local safe_actual_actual_max_power=${actual_actual_max_power:-"-1.0"}
     local safe_runtime_ms=${runtime_ms:-"-1"}
     local safe_runtime_s=${runtime_s:-"-1"}
     local safe_baseline_duration_s=${baseline_duration_s:-"-1"}
-    local safe_genie_computed_power=${genie_computed_power:-"-1.0"}
-    local safe_genie_actual_min_power=${genie_actual_min_power:-"-1.0"}
-    local safe_genie_actual_max_power=${genie_actual_max_power:-"-1.0"}
-    local safe_genie_computed_avg_power=${genie_computed_avg_power:-"-1.0"}
-    local safe_genie_actual_min_avg_power=${genie_actual_min_avg_power:-"-1.0"}
-    local safe_genie_actual_max_avg_power=${genie_actual_max_avg_power:-"-1.0"}
-    local safe_computed_power_per_inference=${computed_power_per_inference:-"-1.0"}
-    local safe_actual_min_power_per_inference=${actual_min_power_per_inference:-"-1.0"}
-    local safe_actual_max_power_per_inference=${actual_max_power_per_inference:-"-1.0"}
     local safe_avg_time_per_question=${avg_time_per_question:-"-1"}
     local safe_genie_soc_power=${genie_soc_power:-"-1.0"}
     local safe_genie_soc_avg_power=${genie_soc_avg_power:-"-1.0"}
     local safe_genie_soc_power_per_inference=${genie_soc_power_per_inference:-"-1.0"}
-
-    # 安全赋值新的功耗变量
-    local safe_baseline_computed_avg_power=${baseline_computed_avg_power:-"-1.0"}
-    local safe_baseline_actual_min_avg_power=${baseline_actual_min_avg_power:-"-1.0"}
-    local safe_baseline_actual_max_avg_power=${baseline_actual_max_avg_power:-"-1.0"}
-    local safe_actual_computed_avg_power=${actual_computed_avg_power:-"-1.0"}
-    local safe_actual_actual_min_avg_power=${actual_actual_min_avg_power:-"-1.0"}
-    local safe_actual_actual_max_avg_power=${actual_actual_max_avg_power:-"-1.0"}
-
-    # 验证和清理所有耗电量数值
-    for var in safe_baseline_computed_power safe_baseline_actual_min_power safe_baseline_actual_max_power safe_actual_computed_power safe_actual_actual_min_power safe_actual_actual_max_power safe_genie_computed_power safe_genie_actual_min_power safe_genie_actual_max_power safe_genie_computed_avg_power safe_genie_actual_min_avg_power safe_genie_actual_max_avg_power safe_computed_power_per_inference safe_actual_min_power_per_inference safe_actual_max_power_per_inference safe_baseline_computed_avg_power safe_baseline_actual_min_avg_power safe_baseline_actual_max_avg_power safe_actual_computed_avg_power safe_actual_actual_min_avg_power safe_actual_actual_max_avg_power; do
-        local value=$(eval echo \$$var)
-        if ! echo "$value" | grep -qE '^-?[0-9]+\.?[0-9]*$'; then
-            eval "$var=\"-1.0\""
-            log_info "变量 $var 的值($value)无效，设置为 -1.0"
-        fi
-    done
 
     # 验证和清理所有时间数值
     for var in safe_runtime_ms safe_runtime_s safe_baseline_duration_s safe_baseline_duration_ms safe_avg_time_per_question; do
@@ -1023,18 +965,7 @@ generate_final_report() {
   "genie_net_power": {
     "soc_consumption_mah": $safe_genie_soc_power,
     "soc_average_power_ma": $safe_genie_soc_avg_power,
-    "soc_power_per_inference_mah": $safe_genie_soc_power_per_inference,
-    "temp_unused_info": {
-      "computed_consumption_mah": $safe_genie_computed_power,
-      "actual_min_consumption_mah": $safe_genie_actual_min_power,
-      "actual_max_consumption_mah": $safe_genie_actual_max_power,
-      "computed_average_power_ma": $safe_genie_computed_avg_power,
-      "actual_min_average_power_ma": $safe_genie_actual_min_avg_power,
-      "actual_max_average_power_ma": $safe_genie_actual_max_avg_power,
-      "computed_power_per_inference_mah": $safe_computed_power_per_inference,
-      "actual_min_power_per_inference_mah": $safe_actual_min_power_per_inference,
-      "actual_max_power_per_inference_mah": $safe_actual_max_power_per_inference
-    }
+    "soc_power_per_inference_mah": $safe_genie_soc_power_per_inference
   },
   "performance_metrics": {
     "total_genie_processes": $process_count,
@@ -1043,26 +974,13 @@ generate_final_report() {
   },
   $(echo "$memory_stats" | sed '1d;$d'),
   "baseline_test": {
-    "computed_power_mah": $safe_baseline_computed_power,
-    "actual_power_min_mah": $safe_baseline_actual_min_power,
-    "actual_power_max_mah": $safe_baseline_actual_max_power,
-    "computed_average_power_ma": $safe_baseline_computed_avg_power,
-    "actual_min_average_power_ma": $safe_baseline_actual_min_avg_power,
-    "actual_max_average_power_ma": $safe_baseline_actual_max_avg_power,
-    "duration_ms": $safe_baseline_duration_ms,
+    "soc_power_mah": $safe_baseline_soc_power,
     "duration_s": $safe_baseline_duration_s,
     "component_temperature": $baseline_component_temperature
   },
   "llm_test": {
-    "computed_power_mah": $safe_actual_computed_power,
-    "actual_power_min_mah": $safe_actual_actual_min_power,
-    "actual_power_max_mah": $safe_actual_actual_max_power,
-    "soc_power_mah": $safe_genie_soc_power,
-    "computed_average_power_ma": $safe_actual_computed_avg_power,
-    "actual_min_average_power_ma": $safe_actual_actual_min_avg_power,
-    "actual_max_average_power_ma": $safe_actual_actual_max_avg_power,
+    "soc_power_mah": $actual_soc_power,
     "duration_ms": $safe_runtime_ms,
-    "duration_s": $safe_runtime_s,
     "component_temperature": $llm_component_temperature
   },
   "test_environment": {
@@ -1079,14 +997,10 @@ EOF
 
     # 输出关键结果
     echo "=== 测试结果摘要 ==="
-    echo "基线耗电量 - Computed: ${baseline_computed_power} mAh, Actual_min: ${baseline_actual_min_power} mAh, Actual_max: ${baseline_actual_max_power} mAh, SoC: ${baseline_soc_power} mAh"
-    echo "基线功耗 - Computed: ${baseline_computed_avg_power} mA, Actual_min: ${baseline_actual_min_avg_power} mA, Actual_max: ${baseline_actual_max_avg_power} mA"
-    echo "LLM测试耗电量 - Computed: ${actual_computed_power} mAh, Actual_min: ${actual_actual_min_power} mAh, Actual_max: ${actual_actual_max_power} mAh, SoC: ${actual_soc_power} mAh"
-    echo "LLM测试功耗 - Computed: ${actual_computed_avg_power} mA, Actual_min: ${actual_actual_min_avg_power} mA, Actual_max: ${actual_actual_max_avg_power} mA"
-    echo "Genie净耗电量 - Computed: ${genie_computed_power} mAh, Actual_min: ${genie_actual_min_power} mAh, Actual_max: ${genie_actual_max_power} mAh"
-    echo "Genie净功耗 - Computed: ${genie_computed_avg_power} mA, Actual_min: ${genie_actual_min_avg_power} mA, Actual_max: ${genie_actual_max_avg_power} mA"
-    echo "SoC净耗电量: ${genie_soc_power} mAh (来自Global CPU)"
-    echo "SoC净功耗: ${genie_soc_avg_power} mA (来自Global CPU)"
+    echo "基线耗电量 - SoC: ${baseline_soc_power} mAh"
+    echo "LLM测试耗电量 - SoC: ${actual_soc_power} mAh"
+    echo "Genie净耗电量: ${genie_soc_power} mAh (来自BatteryStats-Global)"
+    echo "Genie净功耗: ${genie_soc_avg_power} mA (来自BatteryStats-Global)"
     echo "推理进程数: $process_count"
     echo "完成题目数: $completed_questions"
     echo "详细报告: $POWER_MEM_REPORT_FILE"

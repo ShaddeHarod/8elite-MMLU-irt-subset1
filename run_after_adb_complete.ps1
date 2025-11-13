@@ -22,4 +22,6 @@ foreach ($remotePath in $fileList) {
 adb pull /data/local/tmp/genie-qwen2.5-3b/result/POWER_MEM_TEMPERATURE_REPORT.json .\pulled_report_logs
 adb pull /data/local/tmp/genie-qwen2.5-3b/memory_logs/system_memory.log .\pulled_report_logs
 
+
+python scripts/fix_json_model_output.py
 python scripts/analyze_llm_results.py

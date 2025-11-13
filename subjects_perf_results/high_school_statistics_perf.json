@@ -9,45 +9,45 @@
     "question_indices": []
   },
   "performance_metrics": {
-    "avg_prompt_processing_rate_toks_per_sec": 1223.355,
-    "avg_token_generation_rate_toks_per_sec": 35.495,
+    "avg_prompt_processing_rate_toks_per_sec": 1213.587,
+    "avg_token_generation_rate_toks_per_sec": 35.272,
     "total_processed_answers": 5
   },
   "detailed_metrics": {
     "init_time_us": [
-      1069073.0,
-      1052393.0,
-      1068702.0,
-      1084972.0,
-      1071388.0
+      1046880.0,
+      1058062.0,
+      1001957.0,
+      1021456.0,
+      1045726.0
     ],
     "prompt_processing_time_us": [
-      225290.0,
-      227939.0,
-      156266.0,
-      151817.0,
-      154823.0
+      226992.0,
+      225349.0,
+      167986.0,
+      150717.0,
+      152555.0
     ],
     "prompt_processing_rate_toks_per_sec": [
-      1221.001221,
-      1221.001221,
-      1152.07373,
-      1385.041504,
-      1137.656372
+      1212.121216,
+      1234.567871,
+      1071.811401,
+      1394.700195,
+      1154.734375
     ],
     "token_generation_time_us": [
-      112743.0,
-      110584.0,
-      112911.0,
-      113843.0,
-      113440.0
+      113034.0,
+      112322.0,
+      111946.0,
+      114568.0,
+      115238.0
     ],
     "token_generation_rate_toks_per_sec": [
-      35.479866,
-      36.171597,
-      35.427074,
-      35.137035,
-      35.260929
+      35.38821,
+      35.612537,
+      35.732151,
+      34.913761,
+      34.711376
     ]
   }
 }

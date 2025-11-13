@@ -4,103 +4,81 @@
     {
       "question_index": 0,
       "global_index": 0,
-      "start_timestamp": "2025-11-09 22:05:48",
+      "start_timestamp": "2025-11-13 10:38:04",
       "final_answer": "C",
-      "model_output": "
-答案：C
-
-",
+      "model_output": "答案：C",
       "performance_metrics": {
-        "init_time_us": 1290801,
-        "prompt_processing_time_us": 159213,
-        "prompt_processing_rate_toks_per_sec": 917.431213,
-        "token_generation_time_us": 119616,
-        "token_generation_rate_toks_per_sec": 33.440342
+        "init_time_us": 989138,
+        "prompt_processing_time_us": 160460,
+        "prompt_processing_rate_toks_per_sec": 909.918091,
+        "token_generation_time_us": 122590,
+        "token_generation_rate_toks_per_sec": 32.629620
       },
-      "end_timestamp": "2025-11-09 22:05:50"
+      "end_timestamp": "2025-11-13 10:38:06"
     }
 ,
     {
       "question_index": 1,
       "global_index": 1,
-      "start_timestamp": "2025-11-09 22:05:50",
+      "start_timestamp": "2025-11-13 10:38:06",
       "final_answer": "Answer Not Found",
-      "model_output": "
-答案：C
-
-解析：肝是人体重要的解毒器官，它能够清除血液中的胆红素、生成血浆蛋白且参与凝血酶原和纤维蛋白原的生成。其他选项的功能如下：
-- 胆囊：储存和浓缩胆汁，帮助消化脂肪。
-- 肾：主要功能是过滤血液中的废物和多余水分，维持酸碱平衡和电解质平衡。
-- 脾：参与免疫反应，过滤血液中的病原体和衰老的血细胞。
-
-综上所述，正确答案是C. 肝。
-
-",
+      "model_output": "答案：C\n\n解析：肝是人体重要的解毒器官，它能够清除血液中的胆红素、生成血浆蛋白且参与凝血酶原和纤维蛋白原的生成。其他选项的功能如下：\n- 胆囊：储存和浓缩胆汁，帮助消化脂肪。\n- 肾：主要功能是过滤血液中的废物和多余水分，维持酸碱平衡和电解质平衡。\n- 脾：参与免疫反应，过滤血液中的病原体和衰老的血细胞。\n\n综上所述，正确答案是C. 肝。",
       "performance_metrics": {
-        "init_time_us": 1066099,
-        "prompt_processing_time_us": 158677,
-        "prompt_processing_rate_toks_per_sec": 914.076782,
-        "token_generation_time_us": 4434025,
-        "token_generation_rate_toks_per_sec": 27.289597
+        "init_time_us": 1383953,
+        "prompt_processing_time_us": 152100,
+        "prompt_processing_rate_toks_per_sec": 954.198486,
+        "token_generation_time_us": 4423066,
+        "token_generation_rate_toks_per_sec": 27.356787
       },
-      "end_timestamp": "2025-11-09 22:05:56"
+      "end_timestamp": "2025-11-13 10:38:12"
     }
 ,
     {
       "question_index": 2,
       "global_index": 2,
-      "start_timestamp": "2025-11-09 22:05:56",
+      "start_timestamp": "2025-11-13 10:38:12",
       "final_answer": "D",
-      "model_output": "
-答案：D
-
-",
+      "model_output": "答案：D",
       "performance_metrics": {
-        "init_time_us": 1108387,
-        "prompt_processing_time_us": 323278,
-        "prompt_processing_rate_toks_per_sec": 488.758545,
-        "token_generation_time_us": 207444,
-        "token_generation_rate_toks_per_sec": 19.282312
+        "init_time_us": 1313385,
+        "prompt_processing_time_us": 153095,
+        "prompt_processing_rate_toks_per_sec": 1033.057861,
+        "token_generation_time_us": 114007,
+        "token_generation_rate_toks_per_sec": 35.086487
       },
-      "end_timestamp": "2025-11-09 22:05:58"
+      "end_timestamp": "2025-11-13 10:38:14"
     }
 ,
     {
       "question_index": 3,
       "global_index": 3,
-      "start_timestamp": "2025-11-09 22:05:58",
+      "start_timestamp": "2025-11-13 10:38:14",
       "final_answer": "B",
-      "model_output": "
-答案：B
-
-",
+      "model_output": "答案：B",
       "performance_metrics": {
-        "init_time_us": 1302652,
-        "prompt_processing_time_us": 152022,
-        "prompt_processing_rate_toks_per_sec": 967.117981,
-        "token_generation_time_us": 115919,
-        "token_generation_rate_toks_per_sec": 34.507748
+        "init_time_us": 1046725,
+        "prompt_processing_time_us": 153237,
+        "prompt_processing_rate_toks_per_sec": 959.692871,
+        "token_generation_time_us": 111867,
+        "token_generation_rate_toks_per_sec": 35.757706
       },
-      "end_timestamp": "2025-11-09 22:06:00"
+      "end_timestamp": "2025-11-13 10:38:16"
     }
 ,
     {
       "question_index": 4,
       "global_index": 4,
-      "start_timestamp": "2025-11-09 22:06:00",
+      "start_timestamp": "2025-11-13 10:38:16",
       "final_answer": "C",
-      "model_output": "
-答案：C
-
-",
+      "model_output": "答案：C",
       "performance_metrics": {
-        "init_time_us": 1539035,
-        "prompt_processing_time_us": 79096,
-        "prompt_processing_rate_toks_per_sec": 1555.209961,
-        "token_generation_time_us": 114791,
-        "token_generation_rate_toks_per_sec": 34.846848
+        "init_time_us": 1073343,
+        "prompt_processing_time_us": 76851,
+        "prompt_processing_rate_toks_per_sec": 1602.564087,
+        "token_generation_time_us": 111917,
+        "token_generation_rate_toks_per_sec": 35.741093
       },
-      "end_timestamp": "2025-11-09 22:06:02"
+      "end_timestamp": "2025-11-13 10:38:17"
     }
 
   ]

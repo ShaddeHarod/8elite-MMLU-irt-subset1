@@ -1,6 +1,6 @@
 {
-  "llm_test_start_time": "1970-01-21 17:02:27",
-  "llm_test_end_time": "1970-01-21 17:11:53",
+  "llm_test_start_time": "2025-11-09 17:02:27",
+  "llm_test_end_time": "2025-11-09 17:11:53",
   "genie_net_power": {
     "soc_consumption_mah": 61.872,
     "soc_average_power_ma": 407.203,
